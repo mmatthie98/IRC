@@ -1,6 +1,5 @@
 # IRC
 
-Start server : ./irc <port> <password>
+Start server : ./irc < port > < password >
 
-In other term : nc localhost <port>
-
+In other term : nc localhost < port >
