@@ -3,6 +3,7 @@
 
 #include "ircserv.hpp"
 #include "Client.hpp"
+#include "command.hpp"
 
 class Client;
 

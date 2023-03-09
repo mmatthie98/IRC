@@ -114,7 +114,13 @@ int Server::loop()
 						}
 						else
 						{
-							std::vector<std::string> cmd = check(buffer);
+							Command *tmp;
+
+							tmp = check_buffer(buffer);
+							// check_buffer function of maaaaaaaaaaanu
+							// need to check what command is, and redirect in fonction because check is a general function
+							std::vector<std::string> cmd = check(buffer); // Louis utilise cette fonction pour simuler notre parsing, ne pas toucher
+							// parsing here :)
 							ret = handle(cmd, clients[i]);
 							if (ret <= 0)
 								continue;
@@ -142,6 +148,7 @@ std::vector<std::string> Server::check(char *buffer)
 			continue;
 		else
 			tokens.push_back(token);
+	// for USER command, need to catch all after the : stop splitting on space
 	return (tokens);
 }
 
@@ -215,6 +222,10 @@ int Server::handle(std::vector<std::string> cmd, Client client)
 
 	}
 	else if (*it == "PRIVMSG")
+	{
+
+	}
+	else if (*it == "CAP")
 	{
 
 	}
