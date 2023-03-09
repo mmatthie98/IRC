@@ -1,14 +1,10 @@
-#include "ircserv.hpp"
+#include "Server.hpp"
 
-Server::Server() {}
-
-Server::Server(int port, std::string password) : port(port), password(password)
+Server::Server(int port, std::string password) : port(port), password(password), sockfd(0)
 {
 	if (port < 1024 || port > 65535)
 		std::cout << "Careful, chosen port is out of range (allowed ports : 1024 to 65535)" << std::endl;
 }
-
-Server::~Server() {}
 
 int Server::init()
 {
@@ -16,7 +12,7 @@ int Server::init()
 	if (sockfd < 0)
 	{
 		std::cerr << "Socket::Fatal error" << std::endl;
-		return (1);
+		return (-1);
 	}
 	sockfd = ret;
 	ret = fcntl(sockfd, F_SETFL, O_NONBLOCK);
@@ -85,7 +81,8 @@ int Server::loop()
 				FD_SET(client, &fdset);
 				Client new_client(client);
 				clients.push_back(new_client);
-				send(client, "Connected to the server!\n", 25, 0);
+				std::string str = ":ircserv NOTICE * :*** Connected to the server\n";
+				send(client, str.data(), str.length(), 0);
 				std::stringstream ss;
 				ss << "User " << client << " connected\n";
 				std::cout << ss.str();
@@ -99,29 +96,33 @@ int Server::loop()
 				{
 					if (FD_ISSET(clients[i].fd, &copyset))
 					{
-						int client = clients[i].fd;
-						char buffer[1024];
-						memset(buffer, 0, 1024);
-						int bytes_recv = recv(client, buffer, 1024, 0);
+						int clientfd = clients[i].fd;
+						char buffer[512];
+						memset(buffer, 0, 512);
+						int bytes_recv = recv(clientfd, buffer, 512, 0);
 						if (bytes_recv <= 0)
 						{
-							close(client);
-							FD_CLR(client, &fdset);
+							close(clientfd);
+							FD_CLR(clientfd, &fdset);
 							clients[i] = 0;
 							std::stringstream ss;
-							ss << "User " << client << " disconnected\n";
+							ss << "User " << clientfd << " disconnected\n";
 							std::cout << ss.str();
 							for (std::vector<Client>::iterator it = clients.begin() ; it != clients.end() ; ++it)
-								if (it->fd != 0 && it->fd != client)
+								if (it->fd != 0 && it->fd != clientfd)
 									send(it->fd, ss.str().data(), ss.str().length(), 0);
 						}
 						else
 						{
+							std::vector<std::string> cmd = check(buffer);
+							ret = handle(cmd, clients[i]);
+							if (ret <= 0)
+								continue;
 							std::stringstream ss;
-							ss << "User " << client << " : " << buffer;
+							ss << "User " << clientfd << " : " << buffer;
 							std::cout << ss.str();
 							for (std::vector<Client>::iterator it = clients.begin() ; it != clients.end() ; ++it)
-								if (it->fd != 0 && it->fd != client)
+								if (it->fd != 0 && it->fd != clientfd)
 									send(it->fd, ss.str().data(), ss.str().length(), 0);
 						}
 					}
@@ -129,4 +130,95 @@ int Server::loop()
 			}
 		}
 	}
+}
+
+std::vector<std::string> Server::check(char *buffer)
+{
+    std::vector<std::string> tokens;
+    std::stringstream ss(buffer);
+    std::string token;
+    while (std::getline(ss, token, ' '))
+		if (!token.size())
+			continue;
+		else
+			tokens.push_back(token);
+	return (tokens);
+}
+
+int Server::handle(std::vector<std::string> cmd, Client client)
+{
+	std::vector<std::string>::iterator it = cmd.begin();
+	if (*it == "PASS")
+	{
+		++it;
+		it->pop_back();
+		if (*it != password)
+		{
+			client.toggle_password(false);
+			std::string str = ":ircserv NOTICE * :*** Bad password\n";
+			send(client.fd, str.data(), str.length(), 0);
+			return (-1);
+		}
+		client.toggle_password(true);
+	}
+	else if (*it == "NICK")
+	{
+		++it;
+		it->pop_back();
+		if (it->empty() || (*it).length() > 9)
+		{
+			std::string str = ":ircserv NOTICE * :*** Bad nickname\n";
+			send(client.fd, str.data(), str.length(), 0);
+			return (-1);
+		}
+		client.set_nickname(*it);
+	}
+	else if (*it == "USER")
+	{
+		++it;
+		it->pop_back();
+		if (it->empty() || (*it).length() > 9)
+		{
+			std::string str = ":ircserv NOTICE * :*** Bad username\n";
+			send(client.fd, str.data(), str.length(), 0);
+			return (-1);
+		}
+		client.set_username(*it);
+		++it;
+		if (it->empty() || (*it).length() > 9)
+		{
+			std::string str = ":ircserv NOTICE * :*** Bad hostname\n";
+			send(client.fd, str.data(), str.length(), 0);
+			return (-1);
+		}
+		client.set_hostname(*it);
+		++it;
+		if (it->empty() || (*it).length() > 9)
+		{
+			std::string str = ":ircserv NOTICE * :*** Bad servername\n";
+			send(client.fd, str.data(), str.length(), 0);
+			return (-1);
+		}
+		client.set_servername(*it);
+		++it;
+		if (it->empty() || (*it).length() > 9)
+		{
+			std::string str = ":ircserv NOTICE * :*** Bad realname\n";
+			send(client.fd, str.data(), str.length(), 0);
+			return (-1);
+		}
+		client.set_realname(*it);
+		++it;
+	}
+	else if (*it == "JOIN")
+	{
+
+	}
+	else if (*it == "PRIVMSG")
+	{
+
+	}
+	else
+		return (1);
+	return (0);
 }
