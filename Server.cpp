@@ -119,6 +119,8 @@ int Server::loop()
 						else
 						{
 							std::vector<std::string> cmd = check(buffer);
+							//for (std::vector<std::string>::iterator it = cmd.begin() ; it != cmd.end() ; ++it)
+							//	std::cout << "---" << *it << "---" << std::endl;
 							std::vector<std::string>::iterator it = cmd.begin();
 							while (*it == "CAP" || *it == "LS" || (*it).at(0) == '3')
 								cmd.erase(it);
@@ -167,6 +169,11 @@ std::vector<std::string> Server::check(char *buffer)
 			if (token.at(i) == '\r' && token.at(i + 1) == '\n')
 			{
 				tokens.push_back(token.substr(0, i));
+				if (token.back() == '\n')
+				{
+					toggle = 1;
+					break;
+				}
 				tokens.push_back(token.substr(i + 2));
 				toggle = 1;
 				break;
