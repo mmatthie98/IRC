@@ -1,6 +1,7 @@
 # TODO List
 
-## Channels
+## Userlist
+## QUIT
 ## Private messages
 ## Operators
 ## File transfer
