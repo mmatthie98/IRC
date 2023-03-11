@@ -1,19 +1,6 @@
-#include "command.hpp"
+#include "Command.hpp"
 
-Command::Command()
-{
-	this->tab[0] = "/add";
-	this->tab[1] = "/kick";
-	this->tab[2] = "/invite";
-	this->tab[3] = "/ban";
-	add = 0;
-	kick = 0;
-	invite = 0;
-	ban = 0;
-	pass = 0;
-	user = 0;
-	nick = 0;
-}
+Command::Command() {};
 
 Command::Command(Command &other)
 {
@@ -25,58 +12,71 @@ Command& Command::operator=(Command &other)
 {
 	if (this != &other)
 		*this = other;
-	return (*this);	
+	return (*this);
+}
+
+Command::Command(std::vector<std::string> cmd) : command(cmd) {
+	// authentification commands
+	this->upper_cmd[0] = "USER";
+	this->upper_cmd[1] = "PASS";
+	this->upper_cmd[2] = "NICK";
+	// user commands
+	this->upper_cmd[3] = "JOIN";
+	this->upper_cmd[4] = "PRIVMSG";
+	// operator commands
+	this->upper_cmd[5] = "KICK";
+	this->upper_cmd[6] = "INVITE";
+
 }
 
 Command::~Command() { }
 
-std::string Command::access_content(int n)
+std::string Command::access_tab(int n)
 {
-	return (this->tab[n]);
+	return (this->upper_cmd[n]);
 }
 
-int	Command::access_tab(char	*buffer)
+// char Command::check_prefix(std::vector<std::string> vector, Command &cmd)
+// {
+//     vector[0] = :manu
+// 	char *result;
+// 	int i = 0;
+// 	int j = 0;
+
+// 	while (buffer[i][j] <= 32 ||   vector[0].at(1) == 127)
+// 		i++;
+// 	if (buffer[i] == ':')
+// 	{
+// 		i++;
+// 		if (buffer[i] <= 32 || buffer[i] == 127)
+// 			return (NULL);
+// 		else
+// 		{
+// 			while (buffer[i] != ' ')
+// 				j++;
+// 			result = malloc()
+// 		}
+// 	}
+// }
+
+void	Command::parse_commands(std::vector<std::string> vector)
 {
-	Command tmp;
-	std::string test(buffer);
+	// fonction qui check si vector[0] est un prefixe, le erase si y en a un.
 	int i = 0;
-	size_t pos = 0;
-	if (test.find("PASS", pos) != std::string::npos)
-	{
-		get_cmd_serv(test, 0);
-		return (5);
-	}
-	else if (test.find("NICK", pos) != std::string::npos)
-	{
-		get_cmd_serv(test, 1);
-		return (6);
-	}
-	else if (test.find("USER", pos) != std::string::npos)
-	{
-		get_cmd_serv(test, 2);
-		return (7);
-	}
-	if (test[i] == ' ' || test[i] == '\t')
-		while (test[i] == ' ' || test[i] == '\t')
-			i++;
-	for (int j = 0; j < 4; j++)
-	{
-		std::string str = tmp.access_content(j);
-		if (!std::strncmp(&buffer[i], str.c_str(), str.length()))
-			return (j);
-	}
-	return (4);
+	if (vector[i] == "PASS")
+		parse_pass();
+	if (vector[i] == "NICK")
+		parse_nick();
 }
 
-void	Command::get_cmd_serv(std::string buffer, int mod)
-{
-	(void) buffer;
-	std::vector<std::string> arg = split(buffer, ' ');
-	this->buffer_split = arg;
-	if (!mod)
-		std::cout << "PASS want to be changed" << std::endl;
-	else if (mod == 1)
-		std::cout << "NICK want to be changed" << std::endl;
-	else if (mod == 2)
-		std::cout << "USER want to be changed" << std::endl;
+void Command::parse_pass(void) {
+	pass = 1;
+	std::cout << "PASS COMMAND\n";
+	// blabla parse ton pass
+}
+
+void Command::parse_nick(void) {
+	nick = 1;
+	std::cout << "NICK COMMAND\n";
+	// blabla parse ton nick
 }

@@ -1,10 +1,10 @@
 #pragma once
 
 #include "ircserv.hpp"
-#include <iostream>
-#include <string>
-#include <vector>
-#include <sstream>
+#include "Server.hpp"
+
+#define PASS 11
+#define NICK 11
 
 class Client;
 
@@ -13,22 +13,30 @@ class Command
 	public:
 		Command();
 		Command(Command &other);
+		Command(std::vector<std::string> cmd);
 		~Command();
 		Command &operator=(Command &other);
-		int access_tab(char *buffer);
-		std::string access_content(int n);
-		std::vector<std::string> buffer_split;
-		void	get_cmd_serv(std::string buffer, int mod);
+
+		// accessors
+		void parse_commands(std::vector<std::string> command);
+		std::string access_tab(int n);
+		// parsing function
+		void	parse_pass(void);
+		void	parse_nick(void);
+		// attributes
+		std::vector<std::string> command;
+		std::string prefix;
+		bool 		is_prefix;
 		int		none;
-		int		add;
-		int		kick;
 		int		invite;
+		int		kick;
 		int		ban;
 		int		pass;
 		int		user;
 		int		nick;
 	private:
-		std::string tab[10];
+		std::string upper_cmd[10];
+		std::string lower_cmd[10]; // lower + upper ???
 };
-Command	*check_buffer(char *buffer);
-std::vector<std::string> split(const std::string& s, char delimiter);
+
+char *check_prefix(char *buffer, Command &cmd);
