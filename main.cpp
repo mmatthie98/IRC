@@ -17,5 +17,4 @@ int	main(int ac, char **av)
 	serv.loop();
 	close(serv.sock());
 	return (0);
-	// hello there
 }

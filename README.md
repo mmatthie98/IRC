@@ -1,5 +1,8 @@
-# IRC
+# TODO List
 
-Start server : ./irc < port > < password >
-
-In other term : nc localhost < port >
+## Userlist
+## QUIT
+## Private messages
+## Operators
+## File transfer
+## Bot
