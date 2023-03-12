@@ -137,6 +137,12 @@ void Server::loop()
 								continue;
 							if ((cmd.front() == "JOIN" || cmd.front() == "join") && clients[i]->is_auth() == true)
 							{
+								if (cmd.size() < 2)
+								{
+									std::string str = ":ircserv NOTICE * :*** Not enough parameters\n";
+									send(clients[i]->fd, str.data(), str.length(), 0);
+									continue;
+								}
 								std::string chan = cmd.at(1);
 								std::stringstream s;
 								s << ":" << clients[i]->nickname << " JOIN :" << chan << "\n";
@@ -154,6 +160,12 @@ void Server::loop()
 							}
 							else if (cmd.front() == "PRIVMSG" && clients[i]->is_auth() == true)
 							{
+								if (cmd.size() < 3)
+								{
+									std::string str = ":ircserv NOTICE * :*** Not enough parameters\n";
+									send(clients[i]->fd, str.data(), str.length(), 0);
+									continue;
+								}
 								std::string chan = cmd.at(1);
 								std::stringstream ss;
 								ss << ":" << clients[i]->nickname << " PRIVMSG " << chan << " " << cmd.at(2) << "\n";
@@ -163,6 +175,12 @@ void Server::loop()
 							}
 							else if (cmd.front() == "NICK" && clients[i]->is_auth() == true)
 							{
+								if (cmd.size() < 2)
+								{
+									std::string str = ":ircserv NOTICE * :*** Not enough parameters\n";
+									send(clients[i]->fd, str.data(), str.length(), 0);
+									continue;
+								}
 								if (cmd.at(1).empty() || cmd.at(1).length() > 9)
 								{
 									std::string str = ":ircserv NOTICE * :*** Bad nickname\n";
