@@ -27,45 +27,35 @@ Command::Command(std::vector<std::string> cmd) : command(cmd) {
 	this->upper_cmd[5] = "KICK";
 	this->upper_cmd[6] = "INVITE";
 
+	parse_commands(command);
 }
 
-Command::~Command() { }
+Command::~Command() {}
 
 std::string Command::access_tab(int n)
 {
 	return (this->upper_cmd[n]);
 }
 
-// char Command::check_prefix(std::vector<std::string> vector, Command &cmd)
-// {
-//     vector[0] = :manu
-// 	char *result;
-// 	int i = 0;
-// 	int j = 0;
-
-// 	while (buffer[i][j] <= 32 ||   vector[0].at(1) == 127)
-// 		i++;
-// 	if (buffer[i] == ':')
-// 	{
-// 		i++;
-// 		if (buffer[i] <= 32 || buffer[i] == 127)
-// 			return (NULL);
-// 		else
-// 		{
-// 			while (buffer[i] != ' ')
-// 				j++;
-// 			result = malloc()
-// 		}
-// 	}
-// }
-
-void	Command::parse_commands(std::vector<std::string> vector)
+void Command::check_prefix(std::vector<std::string> command)
 {
+	std::vector<std::string>::iterator it = command.begin();
+	if ((*it)[0] == ':') 
+	{
+		prefix = (*it);
+		is_prefix = true;
+		command.erase(command.begin());
+	}
+}
+
+void	Command::parse_commands(std::vector<std::string> command)
+{
+	check_prefix(command);
+	//check_multi_args(command); // start the concatenation only if the first caractere is a :
 	// fonction qui check si vector[0] est un prefixe, le erase si y en a un.
-	int i = 0;
-	if (vector[i] == "PASS")
+	if (command[0] == "PASS")
 		parse_pass();
-	if (vector[i] == "NICK")
+	if (command[0] == "NICK")
 		parse_nick();
 }
 

@@ -21,6 +21,7 @@ class Command
 		void parse_commands(std::vector<std::string> command);
 		std::string access_tab(int n);
 		// parsing function
+		void 	check_prefix(std::vector<std::string> command);
 		void	parse_pass(void);
 		void	parse_nick(void);
 		// attributes
