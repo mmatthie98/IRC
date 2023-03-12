@@ -67,6 +67,8 @@ void	Command::parse_commands(std::vector<std::string> vector)
 		parse_pass();
 	if (vector[i] == "NICK")
 		parse_nick();
+	if (vector[i] == "USER")
+		parse_user();
 }
 
 void Command::parse_pass(void) {
@@ -79,4 +81,10 @@ void Command::parse_nick(void) {
 	nick = 1;
 	std::cout << "NICK COMMAND\n";
 	// blabla parse ton nick
+}
+
+void Command::parse_user(void)
+{
+	user = 1;
+	std::cout << "USER COMMAND\n";
 }

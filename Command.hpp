@@ -23,6 +23,7 @@ class Command
 		// parsing function
 		void	parse_pass(void);
 		void	parse_nick(void);
+		void	parse_user(void);
 		// attributes
 		std::vector<std::string> command;
 		std::string prefix;
