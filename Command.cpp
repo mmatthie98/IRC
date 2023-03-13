@@ -49,7 +49,6 @@ void Command::check_prefix(std::vector<std::string> &command)
 		prefix = (*it);
 		is_prefix = true;
 		command.erase(command.begin());
-		std::cout << ":tim should be erased\n";
 	}
 }
 
