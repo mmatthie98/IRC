@@ -24,10 +24,6 @@ Command::Command(std::vector<std::string> cmd) : command(cmd), is_prefix(false) 
 	this->upper_cmd[3] = "JOIN";
 	this->upper_cmd[4] = "PRIVMSG";
 	// operator commands
-<<<<<<< HEAD
-	this->upper_cmd[5] = "KICK";
-	this->upper_cmd[6] = "INVITE";
-=======
 	this->upper_cmd[5] = "KILL";
 	// canal operator commands
 	this->upper_cmd[6] = "KICK";
@@ -36,7 +32,6 @@ Command::Command(std::vector<std::string> cmd) : command(cmd), is_prefix(false) 
 	this->upper_cmd[9] = "TOPIC";
 
 	parse_commands(command);
->>>>>>> tim
 }
 
 Command::~Command() {}
