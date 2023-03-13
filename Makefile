@@ -5,7 +5,7 @@ SRCS	= main.cpp Client.cpp Server.cpp Command.cpp
 CC		= c++
 RM		= rm -f
 
-CFLAGS = -Wall -Wextra -Werror -std=c++98
+CFLAGS = -Wall -Wextra -Werror -g -std=c++98
 
 $(NAME):
 			${CC} ${CFLAGS} ${SRCS} -o $@

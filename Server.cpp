@@ -126,12 +126,18 @@ void Server::loop()
 						}
 						else
 						{
-							//for (int i = 0 ; buffer[i] ; ++i)
-							//	std::cout << buffer[i] << " : " << static_cast<int>(buffer[i]) << std::endl;
+							// for (int i = 0 ; buffer[i] ; ++i)
+							// 	std::cout << buffer[i] << " : " << static_cast<int>(buffer[i]) << std::endl;
 							std::vector<std::string> cmd = check(buffer);
 							Command command(cmd);
 							//for (std::vector<std::string>::iterator it = cmd.begin() ; it != cmd.end() ; ++it)
 							//	std::cout << "---" << *it << "---" << std::endl;
+<<<<<<< HEAD
+=======
+							// std::vector<std::string>::iterator it = cmd.begin();
+							// while (*it == "CAP" || *it == "LS" || (*it).at(0) == '3')
+							// 	cmd.erase(it);
+>>>>>>> tim
 							ret = handle(cmd, clients[i]);
 							if (ret <= 0 || ((cmd.front() == "PASS" || cmd.front() == "USER") && clients[i]->is_auth() == true))
 								continue;
@@ -145,7 +151,6 @@ void Server::loop()
 								}
 								std::string chan = cmd.at(1);
 								std::stringstream s;
-								s << ":" << clients[i]->nickname << " JOIN :" << chan << "\n";
 								send(clients[i]->fd, s.str().data(), s.str().length(), 0);
 								std::stringstream str;
 								str << ":ircserv 332 * " << chan << " : Bienvenue sur ircserv!\n";
