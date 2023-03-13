@@ -26,7 +26,6 @@ Command::Command(std::vector<std::string> cmd) : command(cmd) {
 	// operator commands
 	this->upper_cmd[5] = "KICK";
 	this->upper_cmd[6] = "INVITE";
-
 }
 
 Command::~Command() { }
