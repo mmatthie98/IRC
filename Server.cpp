@@ -126,8 +126,8 @@ void Server::loop()
 						}
 						else
 						{
-							// for (int i = 0 ; buffer[i] ; ++i)
-							// 	std::cout << buffer[i] << " : " << static_cast<int>(buffer[i]) << std::endl;
+							//for (int i = 0 ; buffer[i] ; ++i)
+							//	std::cout << buffer[i] << " : " << static_cast<int>(buffer[i]) << std::endl;
 							std::vector<std::string> cmd = check(buffer);
 							Command command(cmd);
 							//for (std::vector<std::string>::iterator it = cmd.begin() ; it != cmd.end() ; ++it)
@@ -145,6 +145,7 @@ void Server::loop()
 								}
 								std::string chan = cmd.at(1);
 								std::stringstream s;
+								s << ":" << clients[i]->nickname << " JOIN :" << chan << "\n";
 								send(clients[i]->fd, s.str().data(), s.str().length(), 0);
 								std::stringstream str;
 								str << ":ircserv 332 * " << chan << " : Bienvenue sur ircserv!\n";
