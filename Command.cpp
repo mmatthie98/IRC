@@ -15,7 +15,7 @@ Command& Command::operator=(Command &other)
 	return (*this);
 }
 
-Command::Command(std::vector<std::string> cmd) : command(cmd) {
+Command::Command(std::vector<std::string> cmd) : command(cmd), is_prefix(false) {
 	// authentification commands
 	this->upper_cmd[0] = "USER";
 	this->upper_cmd[1] = "PASS";
@@ -24,8 +24,12 @@ Command::Command(std::vector<std::string> cmd) : command(cmd) {
 	this->upper_cmd[3] = "JOIN";
 	this->upper_cmd[4] = "PRIVMSG";
 	// operator commands
-	this->upper_cmd[5] = "KICK";
-	this->upper_cmd[6] = "INVITE";
+	this->upper_cmd[5] = "KILL";
+	// canal operator commands
+	this->upper_cmd[6] = "KICK";
+	this->upper_cmd[7] = "INVITE";
+	this->upper_cmd[8] = "MODE";
+	this->upper_cmd[9] = "TOPIC";
 
 	parse_commands(command);
 }
@@ -37,22 +41,47 @@ std::string Command::access_tab(int n)
 	return (this->upper_cmd[n]);
 }
 
-void Command::check_prefix(std::vector<std::string> command)
+void Command::check_prefix(std::vector<std::string> &command)
 {
 	std::vector<std::string>::iterator it = command.begin();
-	if ((*it)[0] == ':') 
+	if ((*it)[0] == ':' && (*it)[1]) 
 	{
 		prefix = (*it);
 		is_prefix = true;
 		command.erase(command.begin());
+		std::cout << ":tim should be erased\n";
 	}
 }
 
-void	Command::parse_commands(std::vector<std::string> command)
+void	Command::regroup_last_args(std::vector<std::string> &command)
+{
+	std::vector<std::string>::iterator it = command.begin();
+	while (it != command.end())
+	{
+		if ((*it)[0] == ':' && (*it)[1])
+		{
+			std::vector<std::string>::iterator replace = it;
+			std::stringstream ss;
+			while (it != command.end())
+			{
+				if ((*it)[0] == ':')
+					(*it).erase(0, 1);
+				ss << (*it);
+				ss << ' ';
+				it++;
+			}
+			command.erase(replace, command.end());
+			command.push_back(ss.str());
+			break;
+		}
+		it++;
+	}
+}
+
+void	Command::parse_commands(std::vector<std::string> &command)
 {
 	check_prefix(command);
-	//check_multi_args(command); // start the concatenation only if the first caractere is a :
-	// fonction qui check si vector[0] est un prefixe, le erase si y en a un.
+	regroup_last_args(command);
 	if (command[0] == "PASS")
 		parse_pass();
 	if (command[0] == "NICK")
