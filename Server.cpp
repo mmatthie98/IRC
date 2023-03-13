@@ -132,12 +132,6 @@ void Server::loop()
 							Command command(cmd);
 							//for (std::vector<std::string>::iterator it = cmd.begin() ; it != cmd.end() ; ++it)
 							//	std::cout << "---" << *it << "---" << std::endl;
-<<<<<<< HEAD
-=======
-							// std::vector<std::string>::iterator it = cmd.begin();
-							// while (*it == "CAP" || *it == "LS" || (*it).at(0) == '3')
-							// 	cmd.erase(it);
->>>>>>> tim
 							ret = handle(cmd, clients[i]);
 							if (ret <= 0 || ((cmd.front() == "PASS" || cmd.front() == "USER") && clients[i]->is_auth() == true))
 								continue;
