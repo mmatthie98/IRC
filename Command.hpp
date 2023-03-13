@@ -18,12 +18,14 @@ class Command
 		Command &operator=(Command &other);
 
 		// accessors
-		void parse_commands(std::vector<std::string> command);
+		void parse_commands();
 		std::string access_tab(int n);
 		// parsing function
-		void 	check_prefix(std::vector<std::string> command);
-		void	parse_pass(void);
-		void	parse_nick(void);
+		void	regroup_last_args();
+		void 	check_prefix();
+		void	parse_pass();;
+		void	parse_nick();
+		void 	parse_user();
 		// attributes
 		std::vector<std::string> command;
 		std::string prefix;
