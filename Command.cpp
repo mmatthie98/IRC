@@ -80,7 +80,6 @@ void	Command::regroup_last_args()
 void	Command::parse_commands()
 {
 	check_prefix();
-	regroup_last_args();
 	if (command[0] == "PASS")
 		parse_pass();
 	if (command[0] == "NICK")
