@@ -44,7 +44,7 @@ std::string Command::access_tab(int n)
 void Command::check_prefix(std::vector<std::string> &command)
 {
 	std::vector<std::string>::iterator it = command.begin();
-	if ((*it)[0] == ':' && (*it)[1]) 
+	if ((*it)[0] == ':' && (*it)[1])
 	{
 		prefix = (*it);
 		is_prefix = true;
@@ -85,7 +85,7 @@ void	Command::parse_commands(std::vector<std::string> &command)
 		parse_pass();
 	if (command[0] == "NICK")
 		parse_nick();
-	if (vector[i] == "USER")
+	if (command[0] == "USER")
 		parse_user();
 }
 
