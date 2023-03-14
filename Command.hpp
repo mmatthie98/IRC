@@ -13,7 +13,7 @@ class Command
 	public:
 		Command();
 		Command(Command &other);
-		Command(std::vector<std::string> cmd);
+		Command(std::vector<std::string> cmd, Client* client);
 		~Command();
 		Command &operator=(Command &other);
 

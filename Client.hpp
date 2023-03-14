@@ -11,6 +11,7 @@ class Client
 	std::string servername;
 	std::string realname;
 	bool auth;
+	std::vector<std::string> tmp;
 
 	public:
 		int fd;

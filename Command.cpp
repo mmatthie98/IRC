@@ -15,7 +15,8 @@ Command& Command::operator=(Command &other)
 	return (*this);
 }
 
-Command::Command(std::vector<std::string> cmd) : command(cmd), is_prefix(false) {
+Command::Command(std::vector<std::string> cmd, Client* client) : command(cmd), is_prefix(false) {
+	(void)client;
 	// authentification commands
 	this->upper_cmd[0] = "USER";
 	this->upper_cmd[1] = "PASS";
@@ -44,7 +45,7 @@ std::string Command::access_tab(int n)
 void Command::check_prefix(std::vector<std::string> &command)
 {
 	std::vector<std::string>::iterator it = command.begin();
-	if ((*it)[0] == ':' && (*it)[1]) 
+	if ((*it)[0] == ':' && (*it)[1])
 	{
 		prefix = (*it);
 		is_prefix = true;
