@@ -66,7 +66,7 @@ void	Command::regroup_last_args()
 	std::vector<std::string>::iterator it = command.begin();
 	while (it != command.end())
 	{
-		if ((*it)[0] == ':' && (*it)[1])
+		if ((*it)[0] == ':')
 		{
 			std::vector<std::string>::iterator replace = it;
 			std::stringstream ss;
