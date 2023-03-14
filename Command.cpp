@@ -44,8 +44,6 @@ std::string Command::access_tab(int n)
 int	Command::is_command(std::string str)
 {
 	for (int i = 0; i < 10; i++) {
-		// std::cout << "upper_cmd[i] -> " << upper_cmd[i] << std::endl;
-		// std::cout << "str -> " << str << std::endl;
 		if (upper_cmd[i] == str)
 			return 1;
 	}
@@ -141,9 +139,4 @@ void Command::parse_user(void)
 	std::cout << "USER COMMAND\n";
 	if (command.size() > 4 && command[4].at(0) == ':')
 		regroup_last_args();
-
-	// for (std::vector<std::string>::iterator it = command.begin(); it != command.end(); it++)
-	// {
-	// 		std::cout << "Final Result -> " << (*it) << std::endl;
-	// }
 }
