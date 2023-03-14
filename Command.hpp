@@ -20,6 +20,8 @@ class Command
 		void parse_commands();
 		std::string access_tab(int n);
 		// parsing function
+		std::vector<std::string> get_next_command();
+		int		is_command(std::string str);
 		void	regroup_last_args();
 		void 	check_prefix();
 		void 	parse_user();

@@ -43,6 +43,15 @@ std::string Command::access_tab(int n)
 	return (this->upper_cmd[n]);
 }
 
+int	Command::is_command(std::string str)
+{
+	for (int i = 0; i < 10; i++) {
+		if (upper_cmd[i] == str)
+			return 1;
+	}
+	return (0);
+}
+
 void Command::check_prefix()
 {
 	std::vector<std::string>::iterator it = command.begin();
@@ -83,6 +92,25 @@ void	Command::regroup_last_args()
 	}
 }
 
+std::vector<std::string> Command::get_next_command() {
+	std::vector<std::string> next_cmd;
+
+	std::vector<std::string>::iterator it = command.begin();
+	if (is_command(*it))
+	{
+		next_cmd.push_back((*it));
+		command.erase(command.begin());
+	}
+	std::vector<std::string>::iterator iter = command.begin();
+	while (iter != command.end() && !is_command(*iter))
+	{
+		next_cmd.push_back((*iter));
+		command.erase(iter);
+		it++;
+	}
+	return (next_cmd);
+}
+
 void	Command::parse_commands()
 {
 	check_prefix();
@@ -93,6 +121,7 @@ void	Command::parse_commands()
 	if (command[0] == "JOIN")
 		parse_join();
 	if (command[0] == "KICK")
+		parse_join();
 }
 
 void Command::parse_user(void)

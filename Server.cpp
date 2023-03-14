@@ -126,8 +126,8 @@ void Server::loop()
 						}
 						else
 						{
-							//for (int i = 0 ; buffer[i] ; ++i)
-							//	std::cout << buffer[i] << " : " << static_cast<int>(buffer[i]) << std::endl;
+							// //for (int i = 0 ; buffer[i] ; ++i)
+							//	// std::cout << buffer[i] << " : " << static_cast<int>(buffer[i]) << std::endl;
 							std::vector<std::string> cmd = check(buffer);
 							Command command(cmd, clients[i]);
 							for (std::vector<std::string>::iterator it = command.command.begin() ; it != command.command.end() ; ++it)
