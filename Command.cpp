@@ -78,9 +78,9 @@ void	Command::regroup_last_args()
 	}
 }
 
-void	Command::parse_commands(std::vector<std::string> &command)
+void	Command::parse_commands()
 {
-	check_prefix(command);
+	check_prefix();
 	if (command[0] == "PASS")
 		parse_pass();
 	if (command[0] == "NICK")
