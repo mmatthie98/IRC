@@ -20,7 +20,7 @@ class Server
 		void loop();
 		int sock() const { return (sockfd); }
 		std::vector<std::string> check(char *buffer);
-		int handle(std::vector<std::string> cmd, Client* client);
+		int handle(std::vector<std::string>	cmd, Client* client, std::vector<Client*> clients);
 	private:
 		Server();
 };

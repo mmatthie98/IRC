@@ -22,7 +22,6 @@ int	main(int ac, char **av)
 	catch(const std::exception& e)
 	{
 		system("vmmap ircserv > ./log");
-		system("leaks ircserv");
 		std::cerr << e.what() << std::endl;
 		return (1);
 	}

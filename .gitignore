@@ -1,4 +1,6 @@
 ircserv.dSYM
 ircserv
-a.out
 log
+a.out
+.DS_Store
+.vscode

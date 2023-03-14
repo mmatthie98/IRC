@@ -15,7 +15,8 @@ Command& Command::operator=(Command &other)
 	return (*this);
 }
 
-Command::Command(std::vector<std::string> cmd) : command(cmd), is_prefix(false) {
+Command::Command(std::vector<std::string> cmd, Client* client) : command(cmd), is_prefix(false) {
+	(void)client;
 	// authentification commands
 	this->upper_cmd[0] = "USER";
 	this->upper_cmd[1] = "PASS";
@@ -77,9 +78,9 @@ void	Command::regroup_last_args()
 	}
 }
 
-void	Command::parse_commands()
+void	Command::parse_commands(std::vector<std::string> &command)
 {
-	check_prefix();
+	check_prefix(command);
 	if (command[0] == "PASS")
 		parse_pass();
 	if (command[0] == "NICK")
