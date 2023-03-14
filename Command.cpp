@@ -120,8 +120,6 @@ void	Command::parse_commands()
 		parse_quit();
 	if (command[0] == "JOIN")
 		parse_join();
-	if (command[0] == "KICK")
-		parse_join();
 }
 
 void Command::parse_user(void)
