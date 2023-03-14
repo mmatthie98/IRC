@@ -21,16 +21,17 @@ Command::Command(std::vector<std::string> cmd, Client* client) : command(cmd), i
 	this->upper_cmd[0] = "USER";
 	this->upper_cmd[1] = "PASS";
 	this->upper_cmd[2] = "NICK";
-	// user commands
+	// basic command
 	this->upper_cmd[3] = "JOIN";
 	this->upper_cmd[4] = "PRIVMSG";
-	// operator commands
 	this->upper_cmd[5] = "KILL";
-	// canal operator commands
-	this->upper_cmd[6] = "KICK";
-	this->upper_cmd[7] = "INVITE";
-	this->upper_cmd[8] = "MODE";
-	this->upper_cmd[9] = "TOPIC";
+	this->upper_cmd[5] = "QUIT";
+	// canal operator
+	this->upper_cmd[3] = "KICK";
+	this->upper_cmd[3] = "MODE";
+	this->upper_cmd[3] = "INVITE";
+	this->upper_cmd[3] = "TOPIC";
+	this->upper_cmd[3] = "OPER";
 
 	parse_commands();
 }
@@ -55,17 +56,21 @@ void Command::check_prefix()
 
 void	Command::regroup_last_args()
 {
+	int first = 0;
 	std::vector<std::string>::iterator it = command.begin();
 	while (it != command.end())
 	{
-		if ((*it)[0] == ':' && (*it)[1])
+		if ((*it)[0] == ':')
 		{
 			std::vector<std::string>::iterator replace = it;
 			std::stringstream ss;
 			while (it != command.end())
 			{
-				if ((*it)[0] == ':')
+				if ((*it)[0] == ':' && first == 0)
+				{
 					(*it).erase(0, 1);
+					first = 1;
+				}
 				ss << (*it);
 				ss << ' ';
 				it++;
@@ -81,35 +86,39 @@ void	Command::regroup_last_args()
 void	Command::parse_commands()
 {
 	check_prefix();
-	if (command[0] == "PASS")
-		parse_pass();
-	if (command[0] == "NICK")
-		parse_nick();
 	if (command[0] == "USER")
 		parse_user();
-}
-
-void Command::parse_pass(void) {
-	pass = 1;
-	std::cout << "PASS COMMAND\n";
-	// blabla parse ton pass
-}
-
-void Command::parse_nick(void) {
-	nick = 1;
-	std::cout << "NICK COMMAND\n";
-	// blabla parse ton nick
+	if (command[0] == "QUIT")
+		parse_quit();
+	if (command[0] == "JOIN")
+		parse_join();
 }
 
 void Command::parse_user(void)
 {
-	user = 1;
-	std::cout << "USER COMMAND\n";
 	if (command.size() > 4 && command[4].at(0) == ':')
 		regroup_last_args();
+}
 
-	for (std::vector<std::string>::iterator it = command.begin(); it != command.end(); it++)
+void Command::parse_quit(void)
+{
+	if (command.size() > 1 && command[1].at(0) == ':')
+		regroup_last_args();
+}
+
+void Command::parse_join(void)
+{
+	unsigned int i = 0;
+	std::stringstream forgeron;
+	std::vector<std::string>::iterator it = command.begin();
+	it++;
+	while (i < (*it).size())
 	{
-			std::cout << "Final Result -> " << (*it) << std::endl;
+		if ((*it).at(i) != ',')
+			forgeron << (*it)[i];
+		else
+			break;
+		i++;
 	}
+	command[1] = forgeron.str();
 }
