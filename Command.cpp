@@ -33,7 +33,12 @@ Command::Command(std::vector<std::string> cmd, Client* client) : command(cmd), i
 	this->upper_cmd[3] = "TOPIC";
 	this->upper_cmd[3] = "OPER";
 
+	remove_backslash();
 	parse_commands();
+	
+	// for (std::vector<std::string>::iterator it = command.begin() ; it != command.end() ; ++it) {
+	// 		std::cout << "Command CLASS -> " << *it << std::endl;
+	// 	}
 }
 
 Command::~Command() {}
@@ -173,4 +178,17 @@ void Command::parse_topic(void)
 {
 	if (command.size() > 2 && command[2].at(0) == ':')
 		regroup_last_args();
+}
+
+void	Command::remove_backslash(void)
+{
+	for (std::vector<std::string>::iterator it = command.begin() ; it != command.end() ; ++it) {
+		if (it->back() == '\n')
+			it->pop_back();
+	}
+}
+
+std::vector<std::string> Command::return_vector(void)
+{
+	return command;
 }

@@ -21,6 +21,7 @@ class Command
 		std::string access_tab(int n);
 		// parsing function
 		std::vector<std::string> get_next_command();
+		void	remove_backslash();
 		int		is_command(std::string str);
 		void	regroup_last_args();
 		void 	check_prefix();
@@ -30,6 +31,7 @@ class Command
 		void 	parse_msg();
 		void 	parse_kick();
 		void 	parse_topic();
+		std::vector<std::string> return_vector(void);
 		// attributes
 		std::vector<std::string> command;
 		std::string prefix;
