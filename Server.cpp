@@ -39,7 +39,7 @@ int Server::init()
 		std::cerr << "Bind::Fatal error" << std::endl;
 		return (1);
 	}
-	ret = listen(sockfd, 10);
+	ret = listen(sockfd, 100);
 	if (ret < 0)
 	{
 		std::cerr << "Listen::Fatal error" << std::endl;
@@ -143,8 +143,8 @@ void Server::loop()
 							std::vector<std::string> cmd = check(buffer);
 							Command command(cmd, client);
 							cmd = command.return_vector();
-								//for (std::vector<std::string>::iterator it = cmd.begin() ; it != cmd.end() ; ++it)
-							//	std::cout << "---" << *it << "---" << std::endl;
+							for (std::vector<std::string>::iterator it = cmd.begin() ; it != cmd.end() ; ++it)
+								std::cout << "---" << *it << "---" << std::endl;
 							ret = handle(cmd, clients, client);
 							if (ret <= 0 || ((cmd.front() == "PASS" || cmd.front() == "USER") && client->is_auth() == true))
 								continue;
@@ -270,7 +270,7 @@ std::vector<std::string> Server::check(char *buffer)
 		for (size_t i = 0 ; i < token.length() ; ++i)
 			if (token.at(i) == '\r' && token.at(i + 1) == '\n')
 			{
-				tokens.push_back(token.substr(0, i + 2));
+				tokens.push_back(token.substr(0, i));
 				std::string str = token.substr(i + 2);
 				if (!str.empty() && str.front() != '\n')
 					tokens.push_back(str);

@@ -35,7 +35,7 @@ Command::Command(std::vector<std::string> cmd, Client* client) : command(cmd), i
 
 	remove_backslash();
 	parse_commands();
-	
+
 	// for (std::vector<std::string>::iterator it = command.begin() ; it != command.end() ; ++it) {
 	// 		std::cout << "Command CLASS -> " << *it << std::endl;
 	// 	}
@@ -70,7 +70,6 @@ void Command::check_prefix()
 
 void	Command::regroup_last_args()
 {
-	int first = 0;
 	std::vector<std::string>::iterator it = command.begin();
 	while (it != command.end())
 	{
@@ -80,11 +79,6 @@ void	Command::regroup_last_args()
 			std::stringstream ss;
 			while (it != command.end())
 			{
-				if ((*it)[0] == ':' && first == 0)
-				{
-					(*it).erase(0, 1);
-					first = 1;
-				}
 				ss << (*it);
 				ss << ' ';
 				it++;
