@@ -1,7 +1,6 @@
 # TODO List
 
 ## Parsing
-## Userlist
 ## QUIT
 ## Private messages
 ## Operators
