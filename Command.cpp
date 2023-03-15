@@ -120,6 +120,12 @@ void	Command::parse_commands()
 		parse_quit();
 	if (command[0] == "JOIN")
 		parse_join();
+	if (command[0] == "PRIVMSG")
+		parse_msg();
+	if (command[0] == "KICK")
+		parse_kick();
+	if (command[0] == "TOPIC")
+		parse_topic();
 }
 
 void Command::parse_user(void)
@@ -149,4 +155,22 @@ void Command::parse_join(void)
 		i++;
 	}
 	command[1] = forgeron.str();
+}
+
+void Command::parse_msg(void)
+{
+	if (command.size() > 2 && command[2].at(0) == ':')
+		regroup_last_args();
+}
+
+void Command::parse_kick(void)
+{
+	if (command.size() > 3 && command[3].at(0) == ':')
+		regroup_last_args();
+}
+
+void Command::parse_topic(void)
+{
+	if (command.size() > 2 && command[2].at(0) == ':')
+		regroup_last_args();
 }

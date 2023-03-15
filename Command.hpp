@@ -27,6 +27,9 @@ class Command
 		void 	parse_user();
 		void	parse_quit();
 		void 	parse_join();
+		void 	parse_msg();
+		void 	parse_kick();
+		void 	parse_topic();
 		// attributes
 		std::vector<std::string> command;
 		std::string prefix;
