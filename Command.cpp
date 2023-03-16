@@ -121,6 +121,8 @@ void	Command::parse_commands()
 	check_prefix();
 	if (command[0] == "USER")
 		parse_user();
+	else if (command[0] == "CAP")
+		parse_user_wtf();
 	if (command[0] == "QUIT")
 		parse_quit();
 	if (command[0] == "JOIN")
@@ -136,6 +138,11 @@ void	Command::parse_commands()
 void Command::parse_user(void)
 {
 	if (command.size() > 4 && command[4].at(0) == ':')
+		regroup_last_args();
+}
+
+void Command::parse_user_wtf(void)
+{
 		regroup_last_args();
 }
 

@@ -270,7 +270,7 @@ std::vector<std::string> Server::check(char *buffer)
 		for (size_t i = 0 ; i < token.length() ; ++i)
 			if (token.at(i) == '\r' && token.at(i + 1) == '\n')
 			{
-				tokens.push_back(token.substr(0, i + 2));
+				tokens.push_back(token.substr(0, i));
 				std::string str = token.substr(i + 2);
 				if (!str.empty() && str.front() != '\n')
 					tokens.push_back(str);

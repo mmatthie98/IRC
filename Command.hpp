@@ -26,6 +26,7 @@ class Command
 		void	regroup_last_args();
 		void 	check_prefix();
 		void 	parse_user();
+		void 	parse_user_wtf();
 		void	parse_quit();
 		void 	parse_join();
 		void 	parse_msg();
