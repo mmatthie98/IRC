@@ -1,7 +1,6 @@
 # TODO List
 
-## Unexpected client behavior handling
-## Private messages
+## NICK / NOTICE / PRIVMSG
 ## Operators
 ## File transfer
 ## Bot

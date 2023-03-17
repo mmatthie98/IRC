@@ -14,7 +14,7 @@ class Client
 
 	public:
 		int fd;
-		std::string	nickname;
+		std::string nickname;
 		std::vector<std::string> tmp;
 
 		Client(int fd) : password_valid(false), auth(false), fd(fd) {}
