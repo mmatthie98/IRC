@@ -16,7 +16,7 @@ class Server
 
 	public:
 		Server(int port, std::string password);
-		~Server() {}
+		~Server();
 		int init();
 		void loop();
 		int sock() const { return (sockfd); }

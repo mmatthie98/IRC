@@ -17,7 +17,6 @@ int	main(int ac, char **av)
 		if (ret || ret == -1)
 			return (1);
 		serv.loop();
-		close(serv.sock());
 	}
 	catch(const std::exception& e)
 	{
