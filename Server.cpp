@@ -6,6 +6,12 @@ Server::Server(int port, std::string password) : port(port), sockfd(0), password
 		std::cout << "Careful, chosen port is out of range (allowed ports : 1024 to 65535)" << std::endl;
 }
 
+Server::~Server()
+{
+	if (sockfd)
+		close(sockfd);
+}
+
 int Server::init()
 {
 	int ret = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -45,6 +51,7 @@ int Server::init()
 		std::cerr << "Listen::Fatal error" << std::endl;
 		return (1);
 	}
+	signal(SIGPIPE, SIG_IGN);
 	return (0);
 }
 
@@ -107,26 +114,15 @@ void Server::loop()
 							name.push_back(static_cast<char>(client->fd + 48));
 							if (!client->nickname.empty())
 								name = client->nickname;
-							char toggle = 0;
 							for (std::vector<Channel*>::iterator it = channels.begin() ; it != channels.end() ; ++it)
-							{
 								for (std::vector< ft::pair<std::string, int> >::iterator itt = (*it)->clients.begin() ; itt != (*it)->clients.end() ; ++itt)
 									if (itt->first == client->nickname)
 									{
 										(*it)->clients.erase(itt);
-										if ((*it)->clients.empty())
-										{
-											delete *it;
-											channels.erase(it);
-										}
-										else
+										if ((*it)->clients.size())
 											(*it)->send_userlist();
-										toggle = 1;
 										break;
 									}
-								if (toggle)
-									break;
-							}
 							for (std::vector<Client*>::iterator it = clients.begin() ; it != clients.end() ; ++it)
 								if (*it == client)
 								{
@@ -250,6 +246,7 @@ void Server::loop()
 								send(client->fd, str.data(), str.length(), 0);
 							}
 						}
+						break;
 					}
 				}
 			}
