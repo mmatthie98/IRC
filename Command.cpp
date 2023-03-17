@@ -17,41 +17,19 @@ Command& Command::operator=(Command &other)
 
 Command::Command(std::vector<std::string> cmd, Client* client) : command(cmd), is_prefix(false) {
 	(void)client;
-	// authentification commands
-	this->upper_cmd[0] = "USER";
-	this->upper_cmd[1] = "PASS";
-	this->upper_cmd[2] = "NICK";
-	// basic command
-	this->upper_cmd[3] = "JOIN";
-	this->upper_cmd[4] = "PRIVMSG";
-	this->upper_cmd[5] = "KILL";
-	this->upper_cmd[5] = "QUIT";
-	// canal operator
-	this->upper_cmd[3] = "KICK";
-	this->upper_cmd[3] = "MODE";
-	this->upper_cmd[3] = "INVITE";
-	this->upper_cmd[3] = "TOPIC";
-	this->upper_cmd[3] = "OPER";
-
 	remove_backslash();
 	parse_commands();
-	
 	// for (std::vector<std::string>::iterator it = command.begin() ; it != command.end() ; ++it) {
 	// 		std::cout << "Command CLASS -> " << *it << std::endl;
-	// 	}
+	// }
 }
 
 Command::~Command() {}
 
-std::string Command::access_tab(int n)
-{
-	return (this->upper_cmd[n]);
-}
-
 int	Command::is_command(std::string str)
 {
 	for (int i = 0; i < 10; i++) {
-		if (upper_cmd[i] == str)
+		if (command[i] == str)
 			return 1;
 	}
 	return (0);

@@ -3,9 +3,6 @@
 #include "ircserv.hpp"
 #include "Server.hpp"
 
-#define PASS 11
-#define NICK 11
-
 class Client;
 
 class Command
@@ -16,13 +13,10 @@ class Command
 		Command(std::vector<std::string> cmd, Client* client);
 		~Command();
 		Command &operator=(Command &other);
-		// accessors
-		void parse_commands();
-		std::string access_tab(int n);
 		// parsing function
-		std::vector<std::string> get_next_command();
-		void	remove_backslash();
+		void 	parse_commands();
 		int		is_command(std::string str);
+		void	remove_backslash();
 		void	regroup_last_args();
 		void 	check_prefix();
 		void 	parse_user();
@@ -32,15 +26,12 @@ class Command
 		void 	parse_msg();
 		void 	parse_kick();
 		void 	parse_topic();
-		std::vector<std::string> return_vector(void);
-		// attributes
+		std::vector<std::string> get_next_command();
+		std::vector<std::string> return_vector();
 		std::vector<std::string> command;
 		std::string prefix;
+		// attributes
 		bool 		is_prefix;
 		bool		join_flag;
 	private:
-		std::string upper_cmd[10];
-		std::string lower_cmd[10]; // lower + upper ???
 };
-
-char *check_prefix(char *buffer, Command &cmd);
