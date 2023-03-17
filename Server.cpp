@@ -135,12 +135,15 @@ void Server::loop()
 						else
 						{
 							//for (int i = 0 ; buffer[i] ; ++i)
-							//	std::cout << buffer[i] << " : " << static_cast<int>(buffer[i]) << std::endl;
+								//std::cout << buffer[i] << " : " << static_cast<int>(buffer[i]) << std::endl;
 							std::vector<std::string> cmd = check(buffer);
-							Command command(cmd, client);
+							Command command(cmd, client, std::string(buffer));
 							cmd = command.return_vector();
-							for (std::vector<std::string>::iterator it = cmd.begin() ; it != cmd.end() ; ++it)
-								std::cout << "---" << *it << "---" << std::endl;
+							/*for (std::vector<std::string>::iterator it = cmd.begin() ; it != cmd.end() ; ++it)
+								for (size_t i = 0; i < it->size(); ++i)
+									std::cout << "---" << it->at(i) << "---" << std::endl;*/
+							if (cmd.empty())
+								continue;
 							ret = handle(cmd, clients, client);
 							if (ret <= 0 || ((cmd.front() == "PASS" || cmd.front() == "USER") && client->is_auth() == true))
 								continue;

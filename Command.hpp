@@ -10,7 +10,7 @@ class Command
 	public:
 		Command();
 		Command(Command &other);
-		Command(std::vector<std::string> cmd, Client* client);
+		Command(std::vector<std::string> cmd, Client* client, std::string buffer);
 		~Command();
 		Command &operator=(Command &other);
 		// parsing function
@@ -26,6 +26,8 @@ class Command
 		void 	parse_msg();
 		void 	parse_kick();
 		void 	parse_topic();
+		void    control(std::string buffer);
+		std::vector<std::string> split(std::string arg);
 		std::vector<std::string> get_next_command();
 		std::vector<std::string> return_vector();
 		std::vector<std::string> command;
@@ -33,5 +35,6 @@ class Command
 		// attributes
 		bool 		is_prefix;
 		bool		join_flag;
+		Client		*cl;
 	private:
 };
