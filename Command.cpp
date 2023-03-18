@@ -17,7 +17,6 @@ Command& Command::operator=(Command &other)
 
 Command::Command(std::vector<std::string> cmd, Client* client, std::string buffer) : command(cmd), is_prefix(false) {
 	cl = client;
-	(void) buffer;
 	control(buffer);
 	remove_backslash();
 	parse_commands();
@@ -25,6 +24,7 @@ Command::Command(std::vector<std::string> cmd, Client* client, std::string buffe
 	// for (std::vector<std::string>::iterator it = command.begin() ; it != command.end() ; ++it) {
 	// 		std::cout << "Command CLASS -> " << *it << std::endl;
 	// }
+	// std::cout << "*****************" << std::endl;
 }
 
 Command::~Command() {}
@@ -96,19 +96,21 @@ void	Command::parse_commands()
 	if (command.empty())
 		return ;
 	check_prefix();
-	if (command[0] == "USER")
+	if (command[0] == "USER" || command[0] == "user")
 		parse_user();
-	else if (command[0] == "CAP")
+	else if (command[0] == "CAP" || command[0] == "cap")
 		parse_user_wtf();
-	if (command[0] == "QUIT")
+	if (command[0] == "QUIT" || command[0] == "quit")
 		parse_quit();
-	if (command[0] == "JOIN")
+	if (command[0] == "JOIN" || command[0] == "join")
 		parse_join();
-	if (command[0] == "PRIVMSG")
-		parse_msg();
-	if (command[0] == "KICK")
+	if (command[0] == "NOTICE" || command[0] == "notice")
+		parse_msg("NOTICE");
+	if (command[0] == "PRIVMSG" || command[0] == "privmsg")
+		parse_msg("PRIVMSG");
+	if (command[0] == "KICK" || command[0] == "kick")
 		parse_kick();
-	if (command[0] == "TOPIC")
+	if (command[0] == "TOPIC" || command[0] == "topic")
 		parse_topic();
 }
 
@@ -129,27 +131,78 @@ void Command::parse_quit(void)
 		regroup_last_args();
 }
 
+unsigned int Command::coma_count(std::string str)
+{
+	unsigned int i = 0;
+	unsigned int j = 1;
+	while (i < str.size())
+	{
+		if (str[i] == ',')
+			j++;
+		i++;
+	}
+	return (j);
+}
+
 void Command::parse_join(void)
 {
 	unsigned int i = 0;
+	unsigned int j = 0;
+	unsigned int count;
 	std::stringstream forgeron;
-	std::vector<std::string>::iterator it = command.begin();
-	it++;
-	while (i < (*it).size())
+	std::string tmp;
+	tmp = command[1];
+	if (tmp.empty())
+		return;
+	command.clear();
+	command.push_back("JOIN");
+	count = coma_count(tmp);
+	while (i < count)
 	{
-		if ((*it).at(i) != ',')
-			forgeron << (*it)[i];
-		else
-			break;
+		forgeron.str(std::string());
+		while (j < tmp.size() && tmp[j] && tmp[j] != ',')
+		{
+			forgeron << tmp[j];
+			j++;
+		}
+		while (tmp[j] == ',')
+			j++;
+		if (forgeron.str().size())
+			command.push_back(forgeron.str());
 		i++;
 	}
-	command[1] = forgeron.str();
 }
 
-void Command::parse_msg(void)
+void Command::parse_msg(std::string str)
 {
+	unsigned int count;
+	unsigned int i = 0;
+	unsigned int j = 0;
+	std::stringstream forgeron;
 	if (command.size() > 2 && command[2].at(0) == ':')
 		regroup_last_args();
+	std::string save = command[2];
+	std::string tmp = command[1];
+	if (tmp.empty() || save.empty())
+		return;
+	command.clear();
+	command.push_back(str);
+	count = coma_count(tmp);
+	while (i < count)
+	{
+		forgeron.str(std::string());
+		while (j < tmp.size() && tmp[j] && tmp[j] != ',')
+		{
+			forgeron << tmp[j];
+			j++;
+		}
+		while (tmp[j] == ',')
+			j++;
+		if (forgeron.str().size())
+			command.push_back(forgeron.str());
+		i++;
+	}
+	command.push_back(save);
 }
 
 void Command::parse_kick(void)
