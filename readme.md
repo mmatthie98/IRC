@@ -1,5 +1,6 @@
 # TODO List
 
-## Operators
+## Numerical responses
+## Operator commands
 ## File transfer
 ## Bot
