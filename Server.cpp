@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-Server::Server(int port, std::string password) : port(port), sockfd(0), password(password)
+Server::Server(int port, std::string password, std::string op_pass) : port(port), sockfd(0), password(password), op_pass(op_pass)
 {
 	if (port < 1024 || port > 65535)
 	{
@@ -113,7 +113,6 @@ void Server::loop()
 							break;
 						else if (!bytes_recv)
 						{
-							std::vector< ft::pair<std::string, std::string> > op;
 							close(client->fd);
 							FD_CLR(client->fd, &fdset);
 							std::string name = "guest";
@@ -121,17 +120,29 @@ void Server::loop()
 							if (!client->nickname.empty())
 								name = client->nickname;
 							for (std::vector<Channel*>::iterator it = channels.begin() ; it != channels.end() ; ++it)
+							{
 								for (std::vector< ft::pair<std::string, int> >::iterator itt = (*it)->clients.begin() ; itt != (*it)->clients.end() ; ++itt)
 									if (itt->first == client->nickname)
 									{
 										(*it)->clients.erase(itt);
-										if ((*it)->clients.size())
-										{
-											ft::pair<std::string, std::string> tmp((*it)->send_userlist(), (*it)->getName());
-											op.push_back(tmp);
-										}
 										break;
 									}
+								for (std::vector<std::string>::iterator itt = (*it)->operators.begin() ; itt != (*it)->operators.end() ; ++itt)
+									if (*itt == client->nickname)
+									{
+										(*it)->operators.erase(itt);
+										break;
+									}
+								if ((*it)->clients.size() && (*it)->operators.empty())
+								{
+									(*it)->operators.push_back((*it)->clients.begin()->first);
+									for (std::vector<Client*>::iterator i = clients.begin() ; i != clients.end() ; ++i)
+										if ((*i)->nickname == (*it)->clients.begin()->first)
+											(*i)->op.push_back((*it)->getName());
+								}
+								if ((*it)->clients.size())
+									(*it)->send_userlist();
+							}
 							for (std::vector<Client*>::iterator it = clients.begin() ; it != clients.end() ; ++it)
 								if (*it == client)
 								{
@@ -140,10 +151,6 @@ void Server::loop()
 									std::cout << name << " disconnected" << std::endl;
 									break;
 								}
-							for (std::vector<Client*>::iterator it = clients.begin() ; it != clients.end() ; ++it)
-								for (std::vector< ft::pair<std::string, std::string> >::iterator itt = op.begin() ; itt != op.end() ; ++itt)
-									if ((*it)->nickname == itt->first)
-										(*it)->op.push_back(itt->second);
 						}
 						else
 						{
@@ -169,7 +176,7 @@ void Server::loop()
 								}
 								std::string channel = cmd.at(1);
 								if ((channel.front() != '#' && channel.front() != '&') || channel.length() <= 1 || channel.length() > 200)
-								{ // channel must not contain any virgule
+								{
 									std::string str = ":ircserv NOTICE * :*** Channel must start with an # or & followed by 1-200 character(s)\n";
 									send(client->fd, str.data(), str.length(), 0);
 									break;
@@ -190,9 +197,13 @@ void Server::loop()
 										if (!toggle)
 										{
 											toggle = 1;
-											(*it)->clients.push_back(ft::make_pair<std::string, int>(client->nickname, client->fd));
-											if ((*it)->send_userlist() == client->nickname)
+											if ((*it)->operators.empty())
+											{
+												(*it)->operators.push_back(client->nickname);
 												client->op.push_back(channel);
+											}
+											(*it)->clients.push_back(ft::make_pair<std::string, int>(client->nickname, client->fd));
+											(*it)->send_userlist();
 										}
 										break;
 									}
@@ -201,9 +212,10 @@ void Server::loop()
 									Channel *new_channel;
 									new_channel = new Channel(channel);
 									new_channel->clients.push_back(ft::make_pair<std::string, int>(client->nickname, client->fd));
+									new_channel->operators.push_back(client->nickname);
 									channels.push_back(new_channel);
-									new_channel->send_userlist();
 									client->op.push_back(channel);
+									new_channel->send_userlist();
 								}
 							}
 							else if ((cmd.front() == "PRIVMSG" || cmd.front() == "NOTICE") && client->is_auth() == true)
