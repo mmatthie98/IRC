@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-Server::Server(int port, std::string password) : port(port), sockfd(0), password(password)
+Server::Server(int port, std::string password, std::string op_pass) : port(port), sockfd(0), password(password), op_pass(op_pass)
 {
 	if (port < 1024 || port > 65535)
 	{
@@ -152,9 +152,9 @@ void Server::loop()
 							std::vector<std::string> cmd = check(buffer);
 							Command command(cmd, client, std::string(buffer));
 							cmd = command.return_vector();
-							//for (std::vector<std::string>::iterator it = cmd.begin() ; it != cmd.end() ; ++it)
-							//	std::cout << "---" << *it << "---" << std::endl;
-							if (cmd.empty() || cmd.front() == "QUIT" || cmd.front() == "MODE")
+							for (std::vector<std::string>::iterator it = cmd.begin() ; it != cmd.end() ; ++it)
+								std::cout << "---" << *it << "---" << std::endl;
+							if (cmd.empty() || cmd.front() == "QUIT")
 								break;
 							ret = handle(cmd, clients, client);
 							if (ret <= 0 || ((cmd.front() == "PASS" || cmd.front() == "USER") && client->is_auth() == true))
@@ -169,7 +169,7 @@ void Server::loop()
 								}
 								std::string channel = cmd.at(1);
 								if ((channel.front() != '#' && channel.front() != '&') || channel.length() <= 1 || channel.length() > 200)
-								{ // channel must not contain any virgule
+								{
 									std::string str = ":ircserv NOTICE * :*** Channel must start with an # or & followed by 1-200 character(s)\n";
 									send(client->fd, str.data(), str.length(), 0);
 									break;
@@ -294,6 +294,69 @@ void Server::loop()
 									client->set_nickname(dst);
 									send(client->fd, s.str().data(), s.str().length(), 0);
 								}
+							}
+							else if (cmd.front() == "MODE" && client->is_auth() == true)
+							{
+								if (cmd.size() < 4)
+								{
+									std::string str = ":ircserv 461 :Not enough parameters\n";
+									send(client->fd, str.data(), str.length(), 0);
+									break;
+								}
+								std::cout << "----BEFORE----" << std::endl;
+								for (std::vector<Client *>::iterator it = clients.begin(); it != clients.end(); ++it)
+									for (std::vector<std::string>::iterator itt = (*it)->op.begin(); itt != (*it)->op.end(); ++itt)
+										std::cout << "client " << (*it)->nickname << "have rights in channel -> " << (*itt) << std::endl;
+								int rights = 0;
+								int push = 1;
+								for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
+									for (std::vector<std::string>::iterator itt = (*it)->op.begin(); itt != (*it)->op.end(); ++itt)
+										if ((*itt) == cmd[1]) // check that the client have operator rights in the channel
+											rights = 1;
+								if (!rights)
+								{
+									std::string str = ":ircserv 482 " + cmd[3] + " " + cmd[1] + " :You're not channel operator\n";
+									send(client->fd, str.data(), str.length(), 0);
+									continue;
+								}
+								if (command.o_mode == true && rights == 1)
+								{
+									for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
+										if ((*it)->nickname == cmd[3]) // match client and argument
+										{
+											for (std::vector<std::string>::iterator itt = (*it)->op.begin(); itt != (*it)->op.end(); ++itt) {
+												if ((*itt) == cmd[1]) // check if the client already have the operator rights
+												{
+													push = 0;
+													break;
+												}
+											}
+											if (push)
+											{
+												for sur channel
+												(*it)->op.push_back(cmd[1]); // push the channel name into op
+												break;
+											}
+										}
+								}
+								else if (command.o_mode == false && rights == 1)
+								{
+									for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
+										if ((*it)->nickname == cmd[3]) // match client and argument
+										{
+											for (std::vector<std::string>::iterator itt = (*it)->op.begin(); itt != (*it)->op.end(); ++itt)
+												if ((*itt) == cmd[1])
+												{
+													(*it)->op.erase(itt);
+													break;
+												}
+											break;
+										}
+								}
+								std::cout << "----AFTER----" << std::endl;
+								for (std::vector<Client *>::iterator it = clients.begin(); it != clients.end(); ++it)
+									for (std::vector<std::string>::iterator itt = (*it)->op.begin(); itt != (*it)->op.end(); ++itt)
+										std::cout << "client " << (*it)->nickname << "have rights in channel -> " << (*itt) << std::endl;
 							}
 							else
 							{

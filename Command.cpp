@@ -15,7 +15,7 @@ Command& Command::operator=(Command &other)
 	return (*this);
 }
 
-Command::Command(std::vector<std::string> cmd, Client* client, std::string buffer) : command(cmd), is_prefix(false) {
+Command::Command(std::vector<std::string> cmd, Client* client, std::string buffer) : command(cmd), is_prefix(false), o_mode(false) {
 	cl = client;
 	control(buffer);
 	remove_backslash();
@@ -112,6 +112,8 @@ void	Command::parse_commands()
 		parse_kick();
 	if (command[0] == "TOPIC" || command[0] == "topic")
 		parse_topic();
+	if (command[0] == "MODE")
+		parse_mode();
 }
 
 void Command::parse_user(void)
@@ -217,91 +219,101 @@ void Command::parse_topic(void)
 		regroup_last_args();
 }
 
-void	Command::remove_backslash(void)
+void Command::parse_mode(void)
 {
-	for (std::vector<std::string>::iterator it = command.begin() ; it != command.end() ; ++it)
-		if (it->back() == '\n')
-			it->pop_back();
-	if (command.size() == 1)
-		if (command.at(0).empty())
-			command.clear();
+	if (command.size() < 4)
+		return;
+	if (command[2].at(0) == '-')
+		o_mode = false;
+	if (command[2].at(0) == '+')
+		o_mode = true;
 }
 
-std::vector<std::string> Command::return_vector(void)
-{
-	return command;
-}
-
-void	Command::control(std::string buffer)
-{
-	if (command.empty())
-		return ;
-	if (buffer.find('\r') != std::string::npos)
-		if (buffer.find('\n') != std::string::npos)
-			return ;
-	if (command.back().find('\n') != std::string::npos)
+void Command::remove_backslash(void)
 	{
-		if (cl->tmp.empty())
-			return ;
-		else
-		{
-			std::stringstream tmp;
-			for (std::vector<std::string>::iterator it = cl->tmp.begin() ; it != cl->tmp.end() ; ++it)
-				tmp << *it;
-			if (buffer.find(' ') != std::string::npos)
-				tmp << buffer;
-			else
-				for (std::vector<std::string>::iterator it = command.begin(); it != command.end(); it++)
-					tmp << *it;
-			command.clear();
-			command = split(tmp.str());
-			cl->tmp.clear();
-		}
+		for (std::vector<std::string>::iterator it = command.begin(); it != command.end(); ++it)
+			if (it->back() == '\n')
+				it->pop_back();
+		if (command.size() == 1)
+			if (command.at(0).empty())
+				command.clear();
 	}
-	else
+
+	std::vector<std::string> Command::return_vector(void)
+	{
+		return command;
+	}
+
+	void Command::control(std::string buffer)
 	{
 		if (command.empty())
-			return ;
-		std::stringstream slot;
-		if (buffer.find(' ') != std::string::npos)
-			slot << buffer;
+			return;
+		if (buffer.find('\r') != std::string::npos)
+			if (buffer.find('\n') != std::string::npos)
+				return;
+		if (command.back().find('\n') != std::string::npos)
+		{
+			if (cl->tmp.empty())
+				return;
+			else
+			{
+				std::stringstream tmp;
+				for (std::vector<std::string>::iterator it = cl->tmp.begin(); it != cl->tmp.end(); ++it)
+					tmp << *it;
+				if (buffer.find(' ') != std::string::npos)
+					tmp << buffer;
+				else
+					for (std::vector<std::string>::iterator it = command.begin(); it != command.end(); it++)
+						tmp << *it;
+				command.clear();
+				command = split(tmp.str());
+				cl->tmp.clear();
+			}
+		}
 		else
 		{
-			for (std::vector<std::string>::iterator it = this->command.begin() ; it != this->command.end() ; ++it)
-				slot << *it;
-		}
-		cl->tmp.push_back(slot.str());
-		command.clear();
-	}
-}
-
-std::vector<std::string> Command::split(std::string buffer)
-{
-    std::vector<std::string> tokens;
-    std::stringstream ss(buffer);
-    std::string token;
-	char toggle = 0;
-    while (std::getline(ss, token, ' '))
-	{
-		if (!token.size() || token == "\r\n")
-			continue;
-		for (size_t i = 0 ; i < token.length() ; ++i)
-			if (token.at(i) == '\r' && token.at(i + 1) == '\n')
+			if (command.empty())
+				return;
+			std::stringstream slot;
+			if (buffer.find(' ') != std::string::npos)
+				slot << buffer;
+			else
 			{
-				tokens.push_back(token.substr(0, i));
-				std::string str = token.substr(i + 2);
-				if (!str.empty() && str.front() != '\n')
-					tokens.push_back(str);
-				toggle = 1;
-				break;
+				for (std::vector<std::string>::iterator it = this->command.begin(); it != this->command.end(); ++it)
+					slot << *it;
 			}
-		if (!toggle)
-			tokens.push_back(token);
-		else
-			toggle = 0;
+			cl->tmp.push_back(slot.str());
+			command.clear();
+		}
 	}
-	for (std::vector<std::string>::iterator it = tokens.begin() ; it != tokens.end() ; ++it)
-		if (it->back() == '\n')
-			it->pop_back();
-	return (tokens);
-}
+
+	std::vector<std::string> Command::split(std::string buffer)
+	{
+		std::vector<std::string> tokens;
+		std::stringstream ss(buffer);
+		std::string token;
+		char toggle = 0;
+		while (std::getline(ss, token, ' '))
+		{
+			if (!token.size() || token == "\r\n")
+				continue;
+			for (size_t i = 0; i < token.length(); ++i)
+				if (token.at(i) == '\r' && token.at(i + 1) == '\n')
+				{
+					tokens.push_back(token.substr(0, i));
+					std::string str = token.substr(i + 2);
+					if (!str.empty() && str.front() != '\n')
+						tokens.push_back(str);
+					toggle = 1;
+					break;
+				}
+			if (!toggle)
+				tokens.push_back(token);
+			else
+				toggle = 0;
+		}
+		for (std::vector<std::string>::iterator it = tokens.begin(); it != tokens.end(); ++it)
+			if (it->back() == '\n')
+				it->pop_back();
+		return (tokens);
+	}

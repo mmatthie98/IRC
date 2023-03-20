@@ -12,10 +12,11 @@ class Server
 {
 	int port;
 	int sockfd;
-	std::string password;
+	const std::string password;
+	const std::string op_pass;
 
 	public:
-		Server(int port, std::string password);
+		Server(int port, std::string password, std::string op_pass);
 		~Server();
 		int init();
 		void loop();
