@@ -159,8 +159,8 @@ void Server::loop()
 							std::vector<std::string> cmd = check(buffer);
 							Command command(cmd, client, std::string(buffer));
 							cmd = command.return_vector();
-							for (std::vector<std::string>::iterator it = cmd.begin() ; it != cmd.end() ; ++it)
-								std::cout << "---" << *it << "---" << std::endl;
+							// for (std::vector<std::string>::iterator it = cmd.begin() ; it != cmd.end() ; ++it)
+							// 	std::cout << "---" << *it << "---" << std::endl;
 							if (cmd.empty() || cmd.front() == "QUIT")
 								break;
 							ret = handle(cmd, clients, client);
@@ -308,68 +308,7 @@ void Server::loop()
 								}
 							}
 							else if (cmd.front() == "MODE" && client->is_auth() == true)
-							{
-								if (cmd.size() < 4)
-								{
-									std::string str = ":ircserv 461 :Not enough parameters\n";
-									send(client->fd, str.data(), str.length(), 0);
-									break;
-								}
-								std::cout << "----BEFORE----" << std::endl;
-								for (std::vector<Client *>::iterator it = clients.begin(); it != clients.end(); ++it)
-									for (std::vector<std::string>::iterator itt = (*it)->op.begin(); itt != (*it)->op.end(); ++itt)
-										std::cout << "client " << (*it)->nickname << "have rights in channel -> " << (*itt) << std::endl;
-								int rights = 0;
-								int push = 1;
-								for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
-									for (std::vector<std::string>::iterator itt = (*it)->op.begin(); itt != (*it)->op.end(); ++itt)
-										if ((*itt) == cmd[1]) // check that the client have operator rights in the channel
-											rights = 1;
-								if (!rights)
-								{
-									std::string str = ":ircserv 482 " + cmd[3] + " " + cmd[1] + " :You're not channel operator\n";
-									send(client->fd, str.data(), str.length(), 0);
-									continue;
-								}
-								if (command.o_mode == true && rights == 1)
-								{
-									for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
-										if ((*it)->nickname == cmd[3]) // match client and argument
-										{
-											for (std::vector<std::string>::iterator itt = (*it)->op.begin(); itt != (*it)->op.end(); ++itt) {
-												if ((*itt) == cmd[1]) // check if the client already have the operator rights
-												{
-													push = 0;
-													break;
-												}
-											}
-											if (push)
-											{
-												for sur channel
-												(*it)->op.push_back(cmd[1]); // push the channel name into op
-												break;
-											}
-										}
-								}
-								else if (command.o_mode == false && rights == 1)
-								{
-									for (std::vector<Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
-										if ((*it)->nickname == cmd[3]) // match client and argument
-										{
-											for (std::vector<std::string>::iterator itt = (*it)->op.begin(); itt != (*it)->op.end(); ++itt)
-												if ((*itt) == cmd[1])
-												{
-													(*it)->op.erase(itt);
-													break;
-												}
-											break;
-										}
-								}
-								std::cout << "----AFTER----" << std::endl;
-								for (std::vector<Client *>::iterator it = clients.begin(); it != clients.end(); ++it)
-									for (std::vector<std::string>::iterator itt = (*it)->op.begin(); itt != (*it)->op.end(); ++itt)
-										std::cout << "client " << (*it)->nickname << "have rights in channel -> " << (*itt) << std::endl;
-							}
+								mode(&command, clients, channels, client);
 							else
 							{
 								std::stringstream ss;
