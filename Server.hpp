@@ -28,7 +28,8 @@ class Server
 		void join(std::vector<std::string>& cmd, Client* client, std::vector<Channel*>& channels);
 		void privmsg(std::vector<std::string>& cmd, Client* client, std::vector<Client*>& clients, std::vector<Channel*>& channels);
 		void nick(std::vector<std::string>& cmd, Client* client, std::vector<Client*>& clients, std::vector<Channel*>& channels);
-		void kill(std::vector<std::string> &cmd, Client *client, fd_set &fdset, std::vector<Client *> &clients, std::vector<Channel *> &channels);
+		void kill(std::vector<std::string>& cmd, Client* client, fd_set& fdset, std::vector<Client *>& clients, std::vector<Channel *>& channels);
+		void kick(std::vector<std::string>& cmd, Client* client, std::vector<Client *>& clients, std::vector<Channel *>& channels);
 		int	mode(Command *command, std::vector<Client*> clients, std::vector<Channel*> channels, Client *client);
 		int	topic(Command *command, std::vector<Channel*> channels, Client *client);
 	private:

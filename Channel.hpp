@@ -7,6 +7,7 @@ class Channel
 {
 	std::string name;
 	std::string topic;
+
 	public:
 		std::vector< ft::pair<std::string, int> > clients;
 		std::vector<std::string> operators;
