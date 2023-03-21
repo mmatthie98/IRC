@@ -25,7 +25,7 @@ void Server::message(Client* client, fd_set& fdset, std::vector<Client*>& client
 		int ret = handle(cmd, clients, client);
 		if (ret <= 0 || ((cmd.front() == "PASS" || cmd.front() == "USER") && client->is_auth() == true))
 			return ;
-		if ((cmd.front() == "JOIN" || cmd.front() == "join") && client->is_auth() == true)
+		if (cmd.front() == "JOIN" && client->is_auth() == true)
 			join(cmd, client, channels);
 		else if ((cmd.front() == "PRIVMSG" || cmd.front() == "NOTICE") && client->is_auth() == true)
 			privmsg(cmd, client, clients, channels);
@@ -90,7 +90,7 @@ void Server::join(std::vector<std::string>& cmd, Client* client, std::vector<Cha
 {
 	if (cmd.size() < 2)
 	{
-		std::string str = ":ircserv NOTICE * :*** Not enough parameters\n";
+        std::string str = ":ircserv 461 :Not enough parameters\n";
 		send(client->fd, str.data(), str.length(), 0);
 		return ;
 	}
@@ -143,7 +143,7 @@ void Server::privmsg(std::vector<std::string>& cmd, Client* client ,std::vector<
 {
 	if (cmd.size() < 3)
 	{
-		std::string str = ":ircserv NOTICE * :*** Not enough parameters\n";
+        std::string str = ":ircserv 461 :Not enough parameters\n";
 		send(client->fd, str.data(), str.length(), 0);
 		return ;
 	}
@@ -186,7 +186,7 @@ void Server::nick(std::vector<std::string>& cmd, Client* client, std::vector<Cli
 {
 	if (cmd.size() < 2)
 	{
-		std::string str = ":ircserv NOTICE * :*** Not enough parameters\n";
+        std::string str = ":ircserv 461 :Not enough parameters\n";
 		send(client->fd, str.data(), str.length(), 0);
 		return ;
 	}
@@ -242,7 +242,7 @@ void Server::kill(std::vector<std::string>& cmd, Client* client, fd_set& fdset, 
 {
 	if (cmd.size() < 3)
 	{
-		std::string str = ":ircserv NOTICE * :*** Not enough parameters\n";
+        std::string str = ":ircserv 461 :Not enough parameters\n";
 		send(client->fd, str.data(), str.length(), 0);
 		return ;
 	}

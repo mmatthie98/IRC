@@ -16,6 +16,7 @@ class Command
 		// parsing function
 		void 	parse_commands();
 		int		is_command(std::string str);
+		void	upper_commands();
 		void	remove_backslash();
 		void	regroup_last_args();
 		void 	check_prefix();

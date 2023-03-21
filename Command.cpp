@@ -20,19 +20,16 @@ Command::Command(std::vector<std::string> cmd, Client* client, std::string buffe
 	control(buffer);
 	remove_backslash();
 	parse_commands();
-
-	// for (std::vector<std::string>::iterator it = command.begin() ; it != command.end() ; ++it) {
-	// 		std::cout << "Command CLASS -> " << *it << std::endl;
-	// }
-	// std::cout << "*****************" << std::endl;
 }
 
 Command::~Command() {}
 
 int	Command::is_command(std::string str)
 {
-	for (int i = 0; i < 10; i++) {
-		if (command[i] == str)
+	// parsing de kick a refaire avec la gestion des virgules;
+	std::string check[22] = {"USER", "user", "NICK", "nick", "PASS", "pass", "QUIT", "quit", "JOIN", "join", "PRIVMSG", "privmsg", "NOTICE", "notice", "MODE", "mode", "TOPIC", "topic", "KILL", "kill", "INVITE", "invite"};
+	for (int i = 0; i < 22; i++) {
+		if (check[i] == str)
 			return 1;
 	}
 	return (0);
@@ -91,26 +88,39 @@ std::vector<std::string> Command::get_next_command() {
 	return (next_cmd);
 }
 
+void	Command::upper_commands()
+{
+	for (std::vector<std::string>::iterator it = command.begin(); it != command.end(); ++it)
+	{
+		if (is_command((*it)))
+		{
+			for (unsigned int i = 0; i < (*it).size(); i++)
+				(*it).at(i) = std::toupper((*it).at(i));
+		}
+	}
+}
+
 void	Command::parse_commands()
 {
 	if (command.empty())
 		return ;
 	check_prefix();
-	if (command[0] == "USER" || command[0] == "user")
+	upper_commands();
+	if (command[0] == "USER")
 		parse_user();
-	else if (command[0] == "CAP" || command[0] == "cap")
+	else if (command[0] == "CAP")
 		parse_user_wtf();
-	if (command[0] == "QUIT" || command[0] == "quit")
+	if (command[0] == "QUIT")
 		parse_quit();
-	if (command[0] == "JOIN" || command[0] == "join")
+	if (command[0] == "JOIN")
 		parse_join();
-	if (command[0] == "NOTICE" || command[0] == "notice")
+	if (command[0] == "NOTICE")
 		parse_msg("NOTICE");
-	if (command[0] == "PRIVMSG" || command[0] == "privmsg")
+	if (command[0] == "PRIVMSG")
 		parse_msg("PRIVMSG");
-	if (command[0] == "KICK" || command[0] == "kick")
+	if (command[0] == "KICK")
 		parse_kick();
-	if (command[0] == "TOPIC" || command[0] == "topic")
+	if (command[0] == "TOPIC")
 		parse_topic();
 	if (command[0] == "MODE")
 		parse_mode();
@@ -209,8 +219,53 @@ void Command::parse_msg(std::string str)
 
 void Command::parse_kick(void)
 {
+	std::stringstream forgeron;
+	unsigned int count;
+	unsigned int i = 0;
+	unsigned int j = 0;
 	if (command.size() > 3 && command[3].at(0) == ':')
 		regroup_last_args();
+	std::string save_commentary = command[3];
+	std::string save_users = command[2];
+	std::string save_canal = command[1];
+	if (save_commentary.empty() || save_users.empty() || save_canal.empty())
+		return;
+	command.clear();
+	command.push_back("KICK");
+	count = coma_count(save_canal);
+	while (i < count)
+	{
+		forgeron.str(std::string());
+		while (j < save_canal.size() && save_canal[j] && save_canal[j] != ',')
+		{
+			forgeron << save_canal[j];
+			j++;
+		}
+		while (save_canal[j] == ',')
+			j++;
+		if (forgeron.str().size())
+			command.push_back(forgeron.str());
+		i++;
+	}
+	i = 0;
+	j = 0;
+	count = coma_count(save_users);
+	command.push_back(",");
+	while (i < count)
+	{
+		forgeron.str(std::string());
+		while (j < save_users.size() && save_users[j] && save_users[j] != ',')
+		{
+			forgeron << save_users[j];
+			j++;
+		}
+		while (save_users[j] == ',')
+			j++;
+		if (forgeron.str().size())
+			command.push_back(forgeron.str());
+		i++;
+	}
+	command.push_back(save_commentary);
 }
 
 void Command::parse_topic(void)
