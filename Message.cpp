@@ -16,8 +16,8 @@ void Server::message(Client* client, fd_set& fdset, std::vector<Client*>& client
 		std::vector<std::string> cmd = check(buffer);
 		Command command(cmd, client, std::string(buffer));
 		cmd = command.return_vector();
-		//for (std::vector<std::string>::iterator it = cmd.begin() ; it != cmd.end() ; ++it)
-		//	std::cout << "---" << *it << "---" << std::endl;
+		for (std::vector<std::string>::iterator it = cmd.begin() ; it != cmd.end() ; ++it)
+			std::cout << "---" << *it << "---" << std::endl;
 		if (cmd.empty())
 			return ;
 		if (cmd.front() == "QUIT")
@@ -96,49 +96,56 @@ void Server::join(std::vector<std::string>& cmd, Client* client, std::vector<Cha
 		send(client->fd, str.data(), str.length(), 0);
 		return ;
 	}
-	std::string channel = cmd.at(1);
-	if ((channel.front() != '#' && channel.front() != '&') || channel.length() <= 1 || channel.length() > 200)
+	std::string channel = cmd.back(); // 2 virgules à la suite renvoient une chaine vide
+	while (channel != cmd.front())
 	{
-		std::string str = ":ircserv NOTICE * :*** Channel must start with an # or & followed by 1-200 character(s)\n";
-		send(client->fd, str.data(), str.length(), 0);
-		return ;
-	}
-	std::stringstream s;
-	s << ":" << client->nickname << " JOIN :" << channel << '\n';
-	send(client->fd, s.str().data(), s.str().length(), 0);
-	std::stringstream str;
-	str << ":ircserv 332 " << client->nickname << ' ' << channel << " :Bienvenue sur " << channel << '\n';
-	send(client->fd, str.str().data(), str.str().length(), 0);
-	char toggle = 0;
-	for (std::vector<Channel*>::iterator it = channels.begin() ; it != channels.end() ; ++it)
-		if (channel == (*it)->getName())
+		if ((channel.front() != '#' && channel.front() != '&') || channel.length() <= 1 || channel.length() > 200)
 		{
-			(*it)->setTopic("Bienvenue sur " + channel);
-			for (std::vector< ft::pair<std::string, int> >::iterator itt = (*it)->clients.begin() ; itt != (*it)->clients.end() ; ++itt)
-				if (itt->first == client->nickname)
-					toggle = 1;
-			if (!toggle)
-			{
-				toggle = 1;
-				if ((*it)->operators.empty())
-				{
-					(*it)->operators.push_back(client->nickname);
-					client->op.push_back(channel);
-				}
-				(*it)->clients.push_back(ft::make_pair<std::string, int>(client->nickname, client->fd));
-				(*it)->send_userlist();
-			}
-			break;
+			std::string str = ":ircserv NOTICE * :*** Channel " + channel + " must start with an # or & followed by 1-200 character(s)\n";
+			send(client->fd, str.data(), str.length(), 0);
+			cmd.pop_back();
+			channel = cmd.back();
+			continue;
 		}
-	if (!toggle)
-	{
-		Channel *new_channel;
-		new_channel = new Channel(channel);
-		new_channel->clients.push_back(ft::make_pair<std::string, int>(client->nickname, client->fd));
-		new_channel->operators.push_back(client->nickname);
-		channels.push_back(new_channel);
-		client->op.push_back(channel);
-		new_channel->send_userlist();
+		std::stringstream s;
+		s << ":" << client->nickname << " JOIN :" << channel << '\n';
+		send(client->fd, s.str().data(), s.str().length(), 0);
+		std::stringstream str;
+		str << ":ircserv 332 " << client->nickname << ' ' << channel << " :Bienvenue sur " << channel << '\n';
+		send(client->fd, str.str().data(), str.str().length(), 0);
+		char toggle = 0;
+		for (std::vector<Channel*>::iterator it = channels.begin() ; it != channels.end() ; ++it)
+			if (channel == (*it)->getName())
+			{
+				(*it)->setTopic("Bienvenue sur " + channel);
+				for (std::vector< ft::pair<std::string, int> >::iterator itt = (*it)->clients.begin() ; itt != (*it)->clients.end() ; ++itt)
+					if (itt->first == client->nickname)
+						toggle = 1;
+				if (!toggle)
+				{
+					toggle = 1;
+					if ((*it)->operators.empty())
+					{
+						(*it)->operators.push_back(client->nickname);
+						client->op.push_back(channel);
+					}
+					(*it)->clients.push_back(ft::make_pair<std::string, int>(client->nickname, client->fd));
+					(*it)->send_userlist();
+				}
+				break;
+			}
+		if (!toggle)
+		{
+			Channel *new_channel;
+			new_channel = new Channel(channel);
+			new_channel->clients.push_back(ft::make_pair<std::string, int>(client->nickname, client->fd));
+			new_channel->operators.push_back(client->nickname);
+			channels.push_back(new_channel);
+			client->op.push_back(channel);
+			new_channel->send_userlist();
+		}
+		cmd.pop_back();
+		channel = cmd.back();
 	}
 }
 
@@ -151,7 +158,7 @@ void Server::privmsg(std::vector<std::string>& cmd, Client* client ,std::vector<
 		return ;
 	}
 	char toggle = 0;
-	std::string dst = cmd.at(1);
+	std::string dst = cmd.at(1); // séparer les destinataires du texte a envoyer
 	std::stringstream ss;
 	ss << ":" << client->nickname << ' ' << cmd.at(0) << ' ' << dst << ' ' << cmd.at(2) << '\n';
 	if (dst.front() == '#')
@@ -265,6 +272,9 @@ void Server::kill(std::vector<std::string>& cmd, Client* client, fd_set& fdset, 
 			for (std::vector<Client*>::iterator it = clients.begin() ; it != clients.end() ; ++it)
 				if (usr == (*it)->nickname)
 				{
+					std::stringstream ss;
+					ss << ':' << usr << " KILL :" << cmd.at(2) << '\n'; // cmd.at(2) (comment of kill is not reunited)
+					send((*it)->fd, ss.str().data(), ss.str().length(), 0);
 					quit(*it, fdset, clients, channels);
 					break;
 				}
@@ -288,7 +298,7 @@ void Server::kick(std::vector<std::string>& cmd, Client* client, std::vector<Cli
 {
 	if (cmd.size() < 3)
 	{
-		std::string str = ":ircserv NOTICE * :*** Not enough parameters\n";
+		std::string str = ":ircserv 461 :Not enough parameters\n";
 		send(client->fd, str.data(), str.length(), 0);
 		return ;
 	}
@@ -318,6 +328,14 @@ void Server::kick(std::vector<std::string>& cmd, Client* client, std::vector<Cli
 						(*it)->operators.erase(itt);
 						break;
 					}
+				for (std::vector<Client*>::iterator i = clients.begin() ; i != clients.end() ; ++i)
+					if ((*i)->nickname == usr)
+						for (std::vector<std::string>::iterator j = (*i)->op.begin() ; j != (*i)->op.end() ; ++j)
+							if (*j == (*it)->getName())
+								{
+									(*i)->op.erase(j);
+									break;
+								}
 				if ((*it)->clients.size() && (*it)->operators.empty())
 				{
 					(*it)->operators.push_back((*it)->clients.begin()->first);
