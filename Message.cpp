@@ -34,7 +34,7 @@ void Server::message(Client* client, fd_set& fdset, std::vector<Client*>& client
 		else if (cmd.front() == "MODE" && client->is_auth() == true)
 			mode(&command, clients, channels, client);
 		else if (cmd.front() == "TOPIC" && client->is_auth() == true)
-			topic(&command, clients, channels, client);
+			topic(&command, channels, client);
 		else if (cmd.front() == "KILL" && client->is_auth() == true)
 			kill(cmd, client, fdset, clients, channels);
 		else

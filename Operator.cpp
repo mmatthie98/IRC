@@ -81,9 +81,8 @@ int	Server::mode(Command *command, std::vector<Client*> clients, std::vector<Cha
 }
 
 
-int	Server::topic(Command *command, std::vector<Client*> clients, std::vector<Channel*> channels, Client *client)
+int	Server::topic(Command *command, std::vector<Channel*> channels, Client *client)
 {
-    (void)clients;
     int rights = 0;
     for (std::vector<std::string>::iterator itt = client->op.begin(); itt != client->op.end(); ++itt)
         if ((*itt) == command->command[1])
@@ -109,20 +108,22 @@ int	Server::topic(Command *command, std::vector<Client*> clients, std::vector<Ch
         if (command->command.size() == 2)
         {
             for (std::vector<Channel*>::iterator i = channels.begin(); i != channels.end(); ++i)
-            if ((*i)->getName() == command->command[1])
             {
-				if ((*i)->getTopic().size())
-				{
-						std::string str = ":ircserv 332 " + client->nickname + " " + (*i)->getName() + " " + (*i)->getTopic() + "\n" ;
-						send(client->fd, str.data(), str.length(), 0);
-						return (1);
-				}
-				else
-				{
-					std::string str = ":ircserv 331 " + client->nickname + " " + (*i)->getName() + " :No topic is set.\n";
-					send(client->fd, str.data(), str.length(), 0);
-					return (1);
-				}
+                if ((*i)->getName() == command->command[1])
+                {
+                    if ((*i)->getTopic().size() > 0)
+                    {
+                        std::string str = ":ircserv 332 " + client->nickname + " " + (*i)->getName() + " :" + (*i)->getTopic() + "\n" ;
+                        send(client->fd, str.data(), str.length(), 0);
+                        return (1);
+                    }
+                    else
+                    {
+                        std::string str = ":ircserv 331 " + (*i)->getName() + " :No topic is set\n";
+                        send(client->fd, str.data(), str.length(), 0);
+                        return (1);
+                    }
+                }
             }
         }
 		if (command->command.size() == 3)
