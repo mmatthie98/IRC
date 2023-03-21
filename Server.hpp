@@ -25,6 +25,7 @@ class Server
 		std::vector<std::string> check(char *buffer);
 		int handle(std::vector<std::string>	cmd, std::vector<Client*> clients, Client* client);
 		int	mode(Command *command, std::vector<Client*> clients, std::vector<Channel*> channels, Client *client);
+		int	topic(Command *command, std::vector<Client*> clients, std::vector<Channel*> channels, Client *client);
 	private:
 		Server();
 };

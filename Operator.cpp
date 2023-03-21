@@ -80,3 +80,53 @@ int	Server::mode(Command *command, std::vector<Client*> clients, std::vector<Cha
     return (0);
 }
 
+
+int	Server::topic(Command *command, std::vector<Client*> clients, std::vector<Channel*> channels, Client *client)
+{
+    (void)clients;
+    if (command->command.size() == 1)
+    {
+        std::string str = ":ircserv 461 :Not enough parameters\n";
+        send(client->fd, str.data(), str.length(), 0);
+        return (1);
+    }
+    int check = 0;
+    for (std::vector<Channel*>::iterator i = channels.begin(); i != channels.end(); ++i)
+        if ((*i)->getName() == command->command[1])
+            check = 1;
+    if (check == 1)
+    {
+        if (command->command.size() == 2)
+        {
+            for (std::vector<Channel*>::iterator i = channels.begin(); i != channels.end(); ++i)
+            if ((*i)->getName() == command->command[1])
+            {
+				if ((*i)->getTopic().size())
+				{
+						std::string str = ":ircserv 332 " + client->nickname + " " + (*i)->getName() + " " + (*i)->getTopic() + "\n" ;
+						send(client->fd, str.data(), str.length(), 0);
+						return (1);
+				}
+				else
+				{
+					std::string str = ":ircserv 331 " + client->nickname + " " + (*i)->getName() + " :No topic is set.\n";
+					send(client->fd, str.data(), str.length(), 0);
+					return (1);
+				}
+            }
+        }
+		else if (command->command.size() == 3)
+		{
+            for (std::vector<Channel*>::iterator i = channels.begin(); i != channels.end(); ++i)
+            if ((*i)->getName() == command->command[1])
+				(*i)->setTopic(command->command[2]);
+		}
+    }
+    else
+    {
+        std::string str = ":ircserv 403 " + client->nickname + " " + command->command[1] + " :No such channel\n";
+        send(client->fd, str.data(), str.length(), 0);
+        return (1);
+    }
+    return (0);
+}

@@ -159,8 +159,8 @@ void Server::loop()
 							std::vector<std::string> cmd = check(buffer);
 							Command command(cmd, client, std::string(buffer));
 							cmd = command.return_vector();
-							// for (std::vector<std::string>::iterator it = cmd.begin() ; it != cmd.end() ; ++it)
-							// 	std::cout << "---" << *it << "---" << std::endl;
+							for (std::vector<std::string>::iterator it = cmd.begin() ; it != cmd.end() ; ++it)
+								std::cout << "---" << *it << "---" << std::endl;
 							if (cmd.empty() || cmd.front() == "QUIT")
 								break;
 							ret = handle(cmd, clients, client);
@@ -309,6 +309,8 @@ void Server::loop()
 							}
 							else if (cmd.front() == "MODE" && client->is_auth() == true)
 								mode(&command, clients, channels, client);
+							else if (cmd.front() == "TOPIC" && client->is_auth() == true)
+								topic(&command, clients, channels, client);
 							else
 							{
 								std::stringstream ss;
