@@ -1,6 +1,5 @@
 # TODO List
 
-## Replace notices by numerical responses
-## Operator commands INVITE & TOPIC
+## INVITE
 ## File transfer
 ## Bot

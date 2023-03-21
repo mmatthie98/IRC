@@ -1,5 +1,5 @@
-.DS_Store
 ircserv.dSYM
 ircserv
-.vscode
 a.out
+.vscode
+.DS_Store
