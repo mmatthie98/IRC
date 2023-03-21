@@ -84,6 +84,16 @@ int	Server::mode(Command *command, std::vector<Client*> clients, std::vector<Cha
 int	Server::topic(Command *command, std::vector<Client*> clients, std::vector<Channel*> channels, Client *client)
 {
     (void)clients;
+    int rights = 0;
+    for (std::vector<std::string>::iterator itt = client->op.begin(); itt != client->op.end(); ++itt)
+        if ((*itt) == command->command[1])
+            rights = 1;
+    if (!rights && command->command.size() == 3)
+    {
+        std::string str = ":ircserv 482 " + command->command[3] + " " + command->command[1] + " :You're not channel operator\n";
+        send(client->fd, str.data(), str.length(), 0);
+        return (1);
+    }
     if (command->command.size() == 1)
     {
         std::string str = ":ircserv 461 :Not enough parameters\n";
@@ -115,7 +125,7 @@ int	Server::topic(Command *command, std::vector<Client*> clients, std::vector<Ch
 				}
             }
         }
-		else if (command->command.size() == 3)
+		if (command->command.size() == 3)
 		{
             for (std::vector<Channel*>::iterator i = channels.begin(); i != channels.end(); ++i)
             if ((*i)->getName() == command->command[1])

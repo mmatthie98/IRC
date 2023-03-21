@@ -13,9 +13,9 @@ class Channel
 
 		Channel(std::string name): name(name) {}
 		~Channel() {}
-		std::string getName() { return (name); }
+		std::string getName() const { return (name); }
 		std::string getTopic() { return (topic); }
-		void setTopic(std::string str) {topic = str; }
+		void setTopic(std::string str) { topic = str; }
 		void send_userlist();
 	private:
 		Channel();
