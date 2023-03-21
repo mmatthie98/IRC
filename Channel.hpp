@@ -13,7 +13,7 @@ class Channel
 
 		Channel(std::string name): name(name) {}
 		~Channel() {}
-		std::string getName() { return (name); }
+		std::string getName() const { return (name); }
 		void send_userlist();
 	private:
 		Channel();

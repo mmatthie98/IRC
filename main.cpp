@@ -10,7 +10,7 @@ int	main(int ac, char **av)
 	}
 	try
 	{
-		Server serv(atoi(av[1]), av[2], "secretpassword");
+		Server serv(atoi(av[1]), av[2]);
 		int ret = serv.init();
 		if (ret)
 			close(serv.sock());
