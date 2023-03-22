@@ -28,6 +28,7 @@ class Command
 		void 	parse_kick();
 		void 	parse_topic();
 		void 	parse_mode();
+		void 	parse_kill();
 		void    control(std::string buffer);
 		unsigned int	coma_count(std::string str);
 		std::vector<std::string> split(std::string arg);

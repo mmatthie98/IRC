@@ -123,6 +123,20 @@ void	Command::parse_commands()
 		parse_topic();
 	if (command[0] == "MODE")
 		parse_mode();
+	if (command[0] == "KILL")
+		parse_kill();
+}
+
+void Command::parse_kill(void)
+{
+	if (command.size() < 3)
+	{
+		command.clear();
+		command.push_back("KILL");
+		return ;
+	}
+	if (command.size() > 2 && command[2].at(0) == ':')
+		regroup_last_args();
 }
 
 void Command::parse_user(void)
