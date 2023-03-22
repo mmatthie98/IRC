@@ -96,13 +96,11 @@ void Server::join(std::vector<std::string>& cmd, Client* client, std::vector<Cha
 		send(client->fd, str.data(), str.length(), 0);
 		return ;
 	}
-	std::string channel = cmd.back(); // 2 virgules à la suite renvoient une chaine vide
+	std::string channel = cmd.back();
 	while (channel != cmd.front())
 	{
 		if ((channel.front() != '#' && channel.front() != '&') || channel.length() <= 1 || channel.length() > 200)
 		{
-			std::string str = ":ircserv NOTICE * :*** Channel " + channel + " must start with an # or & followed by 1-200 character(s)\n";
-			send(client->fd, str.data(), str.length(), 0);
 			cmd.pop_back();
 			channel = cmd.back();
 			continue;
@@ -157,38 +155,45 @@ void Server::privmsg(std::vector<std::string>& cmd, Client* client ,std::vector<
 		send(client->fd, str.data(), str.length(), 0);
 		return ;
 	}
-	char toggle = 0;
-	std::string dst = cmd.at(1); // séparer les destinataires du texte a envoyer
-	std::stringstream ss;
-	ss << ":" << client->nickname << ' ' << cmd.at(0) << ' ' << dst << ' ' << cmd.at(2) << '\n';
-	if (dst.front() == '#')
+	std::string txt = cmd.back();
+	cmd.pop_back();
+	std::string dst = cmd.back();
+	while (dst != cmd.front())
 	{
-		for (std::vector<Channel*>::iterator it = channels.begin() ; it != channels.end() ; ++it)
-			if (dst == (*it)->getName())
-			{
-				for (std::vector< ft::pair<std::string, int> >::iterator itt = (*it)->clients.begin() ; itt != (*it)->clients.end() ; ++itt)
-					if (itt->first == client->nickname)
-						toggle = 1;
-				if (toggle)
+		char toggle = 0;
+		std::stringstream ss;
+		ss << ":" << client->nickname << ' ' << cmd.at(0) << ' ' << dst << ' ' << txt << '\n';
+		if (dst.front() == '#')
+		{
+			for (std::vector<Channel*>::iterator it = channels.begin() ; it != channels.end() ; ++it)
+				if (dst == (*it)->getName())
+				{
 					for (std::vector< ft::pair<std::string, int> >::iterator itt = (*it)->clients.begin() ; itt != (*it)->clients.end() ; ++itt)
-						if (itt->first != client->nickname)
-							send(itt->second, ss.str().data(), ss.str().length(), 0);
-			}
-	}
-	else
-	{
-		for (std::vector<Client*>::iterator it = clients.begin() ; it != clients.end() ; ++it)
-			if (dst == (*it)->nickname)
-			{
-				toggle = 1;
-				send((*it)->fd, ss.str().data(), ss.str().length(), 0);
-				break;
-			}
-	}
-	if (!toggle && cmd.front() != "NOTICE")
-	{
-		std::string str = ":ircserv NOTICE * :*** You can't do this operation\n";
-		send(client->fd, str.data(), str.length(), 0);
+						if (itt->first == client->nickname)
+							toggle = 1;
+					if (toggle)
+						for (std::vector< ft::pair<std::string, int> >::iterator itt = (*it)->clients.begin() ; itt != (*it)->clients.end() ; ++itt)
+							if (itt->first != client->nickname)
+								send(itt->second, ss.str().data(), ss.str().length(), 0);
+				}
+		}
+		else
+		{
+			for (std::vector<Client*>::iterator it = clients.begin() ; it != clients.end() ; ++it)
+				if (dst == (*it)->nickname)
+				{
+					toggle = 1;
+					send((*it)->fd, ss.str().data(), ss.str().length(), 0);
+					break;
+				}
+		}
+		if (!toggle && cmd.front() != "NOTICE")
+		{
+			std::string str = ":ircserv NOTICE * :*** You can't send to " + dst + "\n";
+			send(client->fd, str.data(), str.length(), 0);
+		}
+		cmd.pop_back();
+		dst = cmd.back();
 	}
 }
 
@@ -273,7 +278,7 @@ void Server::kill(std::vector<std::string>& cmd, Client* client, fd_set& fdset, 
 				if (usr == (*it)->nickname)
 				{
 					std::stringstream ss;
-					ss << ':' << usr << " KILL :" << cmd.at(2) << '\n'; // cmd.at(2) (comment of kill is not reunited)
+					ss << ':' << usr << " KILL :" << cmd.at(2) << '\n';
 					send((*it)->fd, ss.str().data(), ss.str().length(), 0);
 					quit(*it, fdset, clients, channels);
 					break;
