@@ -39,6 +39,8 @@ void Server::message(Client* client, fd_set& fdset, std::vector<Client*>& client
 			mode(&command, clients, channels, client);
 		else if (cmd.front() == "TOPIC" && client->is_auth() == true)
 			topic(&command, channels, client);
+		else if (cmd.front() == "INVITE" && client->is_auth() == true)
+			invite(cmd, clients, client, channels);
 		else
 		{
 			std::stringstream ss;
