@@ -26,8 +26,8 @@ Command::~Command() {}
 
 int	Command::is_command(std::string str)
 {
-	std::string check[22] = {"USER", "user", "NICK", "nick", "PASS", "pass", "QUIT", "quit", "JOIN", "join", "PRIVMSG", "privmsg", "NOTICE", "notice", "MODE", "mode", "TOPIC", "topic", "KILL", "kill", "INVITE", "invite"};
-	for (int i = 0; i < 22; i++) {
+	std::string check[24] = {"USER", "user", "NICK", "nick", "PASS", "pass", "QUIT", "quit", "JOIN", "join", "PRIVMSG", "privmsg", "NOTICE", "notice", "MODE", "mode", "TOPIC", "topic", "KILL", "kill", "INVITE", "invite", "KICK", "kick"};
+	for (int i = 0; i < 24; i++) {
 		if (check[i] == str)
 			return 1;
 	}
