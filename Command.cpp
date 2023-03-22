@@ -26,7 +26,6 @@ Command::~Command() {}
 
 int	Command::is_command(std::string str)
 {
-	// parsing de kick a refaire avec la gestion des virgules;
 	std::string check[22] = {"USER", "user", "NICK", "nick", "PASS", "pass", "QUIT", "quit", "JOIN", "join", "PRIVMSG", "privmsg", "NOTICE", "notice", "MODE", "mode", "TOPIC", "topic", "KILL", "kill", "INVITE", "invite"};
 	for (int i = 0; i < 22; i++) {
 		if (check[i] == str)
@@ -191,6 +190,12 @@ void Command::parse_msg(std::string str)
 	unsigned int i = 0;
 	unsigned int j = 0;
 	std::stringstream forgeron;
+	if (command.size() < 3)
+	{
+		command.clear();
+		command.push_back(str);
+		return;
+	}
 	if (command.size() > 2 && command[2].at(0) == ':')
 		regroup_last_args();
 	std::string save = command[2];
@@ -219,53 +224,90 @@ void Command::parse_msg(std::string str)
 
 void Command::parse_kick(void)
 {
-	std::stringstream forgeron;
-	unsigned int count;
+	if (command.size() < 3)
+	{
+		command.clear();
+		command.push_back("KICK");
+		return ;
+	}
+	unsigned int coma_canal = 0;
+	unsigned int coma_users = 0;
 	unsigned int i = 0;
 	unsigned int j = 0;
-	if (command.size() > 3 && command[3].at(0) == ':')
+	std::stringstream forgeron;
+	std::string save_commentary;
+	std::string save_users;
+	std::string save_canal;
+	if (command.size() >= 4 && command[3].at(0) == ':')
 		regroup_last_args();
-	std::string save_commentary = command[3];
-	std::string save_users = command[2];
-	std::string save_canal = command[1];
-	if (save_commentary.empty() || save_users.empty() || save_canal.empty())
-		return;
-	command.clear();
-	command.push_back("KICK");
-	count = coma_count(save_canal);
-	while (i < count)
+	if (command.size() >= 4)
+		save_commentary = command[3];
+	if (command.size() >= 3)
+		save_users = command[2];
+	if (command.size() >= 2)
+		save_canal = command[1];
+	coma_canal = coma_count(save_canal);
+	coma_users = coma_count(save_users);
+	if (coma_canal > 1 || coma_users > 1)
 	{
-		forgeron.str(std::string());
-		while (j < save_canal.size() && save_canal[j] && save_canal[j] != ',')
+		command.clear();
+		command.push_back("KICK");
+	}
+	if (coma_canal > 1)
+	{
+		while (i < coma_canal)
 		{
-			forgeron << save_canal[j];
-			j++;
+			forgeron.str(std::string());
+			while (j < save_canal.size() && save_canal[j] && save_canal[j] != ',')
+			{
+				forgeron << save_canal[j];
+				j++;
+			}
+			while (save_canal[j] == ',')
+				j++;
+			if (forgeron.str().size())
+				command.push_back(forgeron.str());
+			i++;
 		}
-		while (save_canal[j] == ',')
-			j++;
-		if (forgeron.str().size())
-			command.push_back(forgeron.str());
-		i++;
+		if (coma_users == 1)
+		{
+			command.push_back(",");
+			command.push_back(save_users);
+			if (save_commentary.size())
+				command.push_back(save_commentary);
+			return;
+		}
+	}
+	if (coma_canal == 1 && coma_canal == 1)
+	{
+		command.clear();
+		command.push_back("KICK");
+		command.push_back(save_canal);
+		command.push_back(",");
+		command.push_back(save_users);
 	}
 	i = 0;
 	j = 0;
-	count = coma_count(save_users);
-	command.push_back(",");
-	while (i < count)
+	if (coma_users > 1)
 	{
-		forgeron.str(std::string());
-		while (j < save_users.size() && save_users[j] && save_users[j] != ',')
+		command.push_back(",");
+		while (i < coma_users)
 		{
-			forgeron << save_users[j];
-			j++;
+			forgeron.str(std::string());
+			while (j < save_users.size() && save_users[j] && save_users[j] != ',')
+			{
+				forgeron << save_users[j];
+				j++;
+			}
+			while (save_users[j] == ',')
+				j++;
+			if (forgeron.str().size())
+				command.push_back(forgeron.str());
+			i++;
 		}
-		while (save_users[j] == ',')
-			j++;
-		if (forgeron.str().size())
-			command.push_back(forgeron.str());
-		i++;
 	}
-	command.push_back(save_commentary);
+	if (save_commentary.size())
+		command.push_back(save_commentary);
 }
 
 void Command::parse_topic(void)
