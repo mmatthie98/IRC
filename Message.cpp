@@ -16,8 +16,8 @@ void Server::message(Client* client, fd_set& fdset, std::vector<Client*>& client
 		std::vector<std::string> cmd = check(buffer);
 		Command command(cmd, client, std::string(buffer));
 		cmd = command.return_vector();
-		//for (std::vector<std::string>::iterator it = cmd.begin() ; it != cmd.end() ; ++it)
-		//	std::cout << "---" << *it << "---" << std::endl;
+		// for (std::vector<std::string>::iterator it = cmd.begin() ; it != cmd.end() ; ++it)
+		// 	std::cout << "---" << *it << "---" << std::endl;
 		if (cmd.empty())
 			return ;
 		if (cmd.front() == "QUIT")
