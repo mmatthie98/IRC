@@ -311,7 +311,7 @@ void Server::kick(std::vector<std::string>& cmd, Client* client, std::vector<Cli
 	}
 	std::vector<std::string> chan;
 	std::vector<std::string> usr;
-	std::string comm = "test";
+	std::string comm;
 	if (cmd.back() != ",")
 	{
 		comm = cmd.back();

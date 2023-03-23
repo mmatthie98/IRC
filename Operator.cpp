@@ -4,6 +4,8 @@ int	Server::mode(Command *command, std::vector<Client*> clients, std::vector<Cha
 {
     if (command->command.size() < 4)
     {
+        command->command.clear();
+        command->command.push_back("MODE");
         std::string str = ":ircserv 461 :Not enough parameters\n";
         send(client->fd, str.data(), str.length(), 0);
         return (1);
@@ -23,11 +25,11 @@ int	Server::mode(Command *command, std::vector<Client*> clients, std::vector<Cha
     {
         for (std::vector<Client *>::iterator it = clients.begin(); it != clients.end(); ++it)
         {
-            if ((*it)->nickname == command->command[3]) // match client and argument
+            if ((*it)->nickname == command->command[3])
             {
                 for (std::vector<std::string>::iterator itt = (*it)->op.begin(); itt != (*it)->op.end(); ++itt)
                 {
-                    if ((*itt) == command->command[1]) // check if the client already have the operator rights
+                    if ((*itt) == command->command[1])
                     {
                         push = 0;
                         break;
@@ -35,15 +37,15 @@ int	Server::mode(Command *command, std::vector<Client*> clients, std::vector<Cha
                 }
                 if (push)
                 {
-                    (*it)->op.push_back(command->command[1]); // push the channel name into op
+                    (*it)->op.push_back(command->command[1]);
                     for (std::vector<Channel *>::iterator i = channels.begin(); i != channels.end(); ++i)
                     {
                         if ((*i)->getName() == command->command[1])
                         {
                             (*i)->operators.push_back(command->command[3]);
                             (*i)->send_userlist();
+                            break;
                         }
-                        break;
                     }
                 }
             }
@@ -53,10 +55,10 @@ int	Server::mode(Command *command, std::vector<Client*> clients, std::vector<Cha
     {
         for (std::vector<Client *>::iterator it = clients.begin(); it != clients.end(); ++it)
         {
-            if ((*it)->nickname == command->command[3]) // match client and argument
+            if ((*it)->nickname == command->command[3])
             {
                 for (std::vector<std::string>::iterator itt = (*it)->op.begin(); itt != (*it)->op.end(); ++itt)
-                    if ((*itt) == command->command[1]) // match channel and argument
+                    if ((*itt) == command->command[1])
                     {
                         (*it)->op.erase(itt);
                         break ;
