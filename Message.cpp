@@ -312,19 +312,19 @@ void Server::kick(std::vector<std::string>& cmd, Client* client, std::vector<Cli
 	std::vector<std::string> chan;
 	std::vector<std::string> usr;
 	std::string comm = "test";
-	/*
 	if (cmd.back() != ",")
 	{
 		comm = cmd.back();
 		cmd.pop_back();
 	}
-	*/
+	while (cmd.back() == ",")
+		cmd.pop_back();
 	while (cmd.back() != ",")
 	{
 		usr.push_back(cmd.back());
 		cmd.pop_back();
 	}
-	if (cmd.back() == ",")
+	while (cmd.back() == ",")
 		cmd.pop_back();
 	while (cmd.back() != cmd.front())
 	{

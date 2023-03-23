@@ -320,6 +320,7 @@ void Command::parse_kick(void)
 			i++;
 		}
 	}
+	command.push_back(",");
 	if (save_commentary.size())
 		command.push_back(save_commentary);
 }
