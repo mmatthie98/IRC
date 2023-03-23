@@ -36,4 +36,5 @@ class Server
 	private:
 		Server();
 };
+
 #endif
