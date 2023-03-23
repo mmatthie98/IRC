@@ -217,6 +217,9 @@ void	Server::invite(std::vector<std::string>& cmd,std::vector<Client*>& clients,
 					std::stringstream str;
 					str << ":" << client->nickname << " INVITE " << cmd[1] << " :" << cmd[2] << '\n';
 					send((*it)->fd, str.str().data(), str.str().length(), 0);
+                    std::stringstream tmp;
+                    tmp << "NOTICE "<<  "@" << cmd[2] << " :" << client->nickname << " invited " << cmd[1] << " into the channel" << '\n';
+                    send((client)->fd, tmp.str().data(), tmp.str().length(), 0);
 					return ;
 				}
 			}
