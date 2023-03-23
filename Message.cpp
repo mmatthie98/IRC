@@ -191,7 +191,7 @@ void Server::privmsg(std::vector<std::string>& cmd, Client* client ,std::vector<
 		}
 		if (!toggle && cmd.front() != "NOTICE")
 		{
-			std::string str = ":ircserv 401 " + dst + " :No such nick/channel\n";
+			std::string str = ":ircserv 401 " + client->nickname + " " + dst + " :No such nick/channel\n";
 			send(client->fd, str.data(), str.length(), 0);
 		}
 		cmd.pop_back();
@@ -276,13 +276,13 @@ void Server::kill(std::vector<std::string>& cmd, Client* client, fd_set& fdset, 
 				toggle2 = 1;
 		if (toggle && toggle2)
 		{
-			for (std::vector<Client*>::iterator it = clients.begin() ; it != clients.end() ; ++it)
-				if (usr == (*it)->nickname)
+			for (std::vector<Client*>::iterator itt = clients.begin() ; itt != clients.end() ; ++itt)
+				if (usr == (*itt)->nickname)
 				{
 					std::stringstream ss;
 					ss << ':' << usr << " KILL :" << cmd.at(2) << '\n';
-					send((*it)->fd, ss.str().data(), ss.str().length(), 0);
-					quit(*it, fdset, clients, channels);
+					send((*itt)->fd, ss.str().data(), ss.str().length(), 0);
+					quit(*itt, fdset, clients, channels);
 					break;
 				}
 			if ((*it)->clients.size() && (*it)->operators.empty())
