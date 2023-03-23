@@ -292,7 +292,7 @@ void Command::parse_kick(void)
 			return;
 		}
 	}
-	if (coma_canal == 1 && coma_canal == 1)
+	if (coma_canal == 1 && coma_users == 1)
 	{
 		command.clear();
 		command.push_back("KICK");
@@ -304,6 +304,8 @@ void Command::parse_kick(void)
 	j = 0;
 	if (coma_users > 1)
 	{
+		if (coma_canal == 1)
+			command.push_back(save_canal);
 		command.push_back(",");
 		while (i < coma_users)
 		{
@@ -320,6 +322,7 @@ void Command::parse_kick(void)
 			i++;
 		}
 	}
+	command.push_back(",");
 	if (save_commentary.size())
 		command.push_back(save_commentary);
 }
