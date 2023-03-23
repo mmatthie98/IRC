@@ -191,7 +191,7 @@ void Server::privmsg(std::vector<std::string>& cmd, Client* client ,std::vector<
 		}
 		if (!toggle && cmd.front() != "NOTICE")
 		{
-			std::string str = ":ircserv NOTICE * :*** You can't send to " + dst + "\n";
+			std::string str = ":ircserv 401 " + dst + " :No such nick/channel\n";
 			send(client->fd, str.data(), str.length(), 0);
 		}
 		cmd.pop_back();
@@ -376,6 +376,11 @@ void Server::kick(std::vector<std::string>& cmd, Client* client, std::vector<Cli
 						}
 						if ((*it)->clients.size())
 							(*it)->send_userlist();
+					}
+					else
+					{
+						std::string str = ":ircserv 482 " + client->nickname + " " + (*it)->getName() + " :You're not channel operator\n";
+						send(client->fd, str.data(), str.length(), 0);
 					}
 				}
 }
