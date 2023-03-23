@@ -150,7 +150,7 @@ void	Server::invite(std::vector<std::string>& cmd,std::vector<Client*>& clients,
 	int chann_flag_manu = 0;
 	if (cmd.size() < 3)
 	{
-		std::string str = ":ircserv 461 " + cmd[0] + " :Not enough parameters\n";
+		std::string str = ":ircserv 461 " + client->nickname + " " + cmd[0] + " :Not enough parameters\n";
 		send(client->fd, str.data(), str.length(), 0);
 		return ;
 	}
@@ -184,13 +184,13 @@ void	Server::invite(std::vector<std::string>& cmd,std::vector<Client*>& clients,
 		}
 		if (!nick_flag_manu)
 		{
-			std::string str = ":ircserv 401 " + cmd[1] + " :No such nick/channel\n";
+			std::string str = ":ircserv 401 " + client->nickname + " " + cmd[1] + " :No such nick/channel\n";
 			send(client->fd, str.data(), str.length(), 0);
 			return ;
 		}
 		else if (!chann_flag_manu)
 		{
-			std::string str = ":ircserv 403 " + cmd[2] + " :No such channel\n";
+			std::string str = ":ircserv 403 " + client->nickname + " " + cmd[2] + " :No such channel\n";
 			send(client->fd, str.data(), str.length(), 0);
 			return ;
 		}
@@ -220,7 +220,7 @@ void	Server::invite(std::vector<std::string>& cmd,std::vector<Client*>& clients,
 					str << ":" << client->nickname << " INVITE " << cmd[1] << " :" << cmd[2] << '\n';
 					send((*it)->fd, str.str().data(), str.str().length(), 0);
                     std::stringstream tmp;
-                    tmp << "NOTICE "<<  "@" << cmd[2] << " :" << client->nickname << " invited " << cmd[1] << " into the channel" << '\n';
+                    tmp << ":NOTICE "<<  "@" << cmd[2] << " :" << client->nickname << " invited " << cmd[1] << " into the channel" << '\n';
                     send((client)->fd, tmp.str().data(), tmp.str().length(), 0);
 					return ;
 				}
