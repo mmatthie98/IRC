@@ -45,9 +45,9 @@ void Server::message(Client* client, fd_set& fdset, std::vector<Client*>& client
 		{
 			std::stringstream ss;
 			if (client->is_auth() == false)
-				ss << ":ircserv 451 * :You have not registered\n";
+				ss << ":ircserv 451 :You have not registered\n";
 			else
-				ss << ":ircserv 421 "<< client->nickname << ' ' << cmd.at(0) << " :Unknown command\n";
+				ss << ":ircserv 421 " << client->nickname << ' ' << cmd.at(0) << " :Unknown command\n";
 			send(client->fd, ss.str().data(), ss.str().length(), 0);
 		}
 	}
@@ -59,10 +59,12 @@ void Server::quit(Client* client, fd_set& fdset, std::vector<Client*>& clients, 
 	FD_CLR(client->fd, &fdset);
 	for (std::vector<Channel*>::iterator it = channels.begin() ; it != channels.end() ; ++it)
 	{
+		char toggle = 0;
 		for (std::vector< ft::pair<std::string, int> >::iterator itt = (*it)->clients.begin() ; itt != (*it)->clients.end() ; ++itt)
 			if (itt->first == client->nickname)
 			{
 				(*it)->clients.erase(itt);
+				toggle = 1;
 				break;
 			}
 		for (std::vector<std::string>::iterator itt = (*it)->operators.begin() ; itt != (*it)->operators.end() ; ++itt)
@@ -78,7 +80,7 @@ void Server::quit(Client* client, fd_set& fdset, std::vector<Client*>& clients, 
 				if ((*i)->nickname == (*it)->clients.begin()->first)
 					(*i)->op.push_back((*it)->getName());
 		}
-		if ((*it)->clients.size())
+		if (toggle)
 			(*it)->send_userlist();
 	}
 	for (std::vector<Client*>::iterator it = clients.begin() ; it != clients.end() ; ++it)
@@ -264,6 +266,9 @@ void Server::kill(std::vector<std::string>& cmd, Client* client, fd_set& fdset, 
 		return ;
 	}
 	std::string usr = cmd.at(1);
+	std::string comm = cmd.at(2);
+	if (comm.front() == ':')
+		comm.erase(comm.begin());
 	for (std::vector<Channel*>::iterator it = channels.begin() ; it != channels.end() ; ++it)
 	{
 		char toggle = 0;
@@ -280,20 +285,11 @@ void Server::kill(std::vector<std::string>& cmd, Client* client, fd_set& fdset, 
 				if (usr == (*itt)->nickname)
 				{
 					std::stringstream ss;
-					ss << ':' << usr << " KILL :" << cmd.at(2) << '\n';
+					ss << ':' << usr << " KILL :" << comm << '\n';
 					send((*itt)->fd, ss.str().data(), ss.str().length(), 0);
 					quit(*itt, fdset, clients, channels);
 					break;
 				}
-			if ((*it)->clients.size() && (*it)->operators.empty())
-			{
-				(*it)->operators.push_back((*it)->clients.begin()->first);
-				for (std::vector<Client*>::iterator i = clients.begin() ; i != clients.end() ; ++i)
-					if ((*i)->nickname == (*it)->clients.begin()->first)
-						(*i)->op.push_back((*it)->getName());
-			}
-			if ((*it)->clients.size())
-				(*it)->send_userlist();
 			return ;
 		}
 	}
@@ -311,10 +307,12 @@ void Server::kick(std::vector<std::string>& cmd, Client* client, std::vector<Cli
 	}
 	std::vector<std::string> chan;
 	std::vector<std::string> usr;
-	std::string comm;
+	std::string comm = "";
 	if (cmd.back() != ",")
 	{
 		comm = cmd.back();
+		if (comm.front() == ':')
+			comm.erase(comm.begin());
 		cmd.pop_back();
 	}
 	while (cmd.back() == ",")
@@ -337,20 +335,32 @@ void Server::kick(std::vector<std::string>& cmd, Client* client, std::vector<Cli
 				if ((*it)->getName() == *iter)
 				{
 					char toggle = 0;
+					char toggle2 = 0;
 					for (std::vector<std::string>::iterator itt = (*it)->operators.begin() ; itt != (*it)->operators.end() ; ++itt)
 						if (*itt == client->nickname)
 							toggle = 1;
-					if (toggle)
+					if (!toggle)
 					{
+						std::string str = ":ircserv 482 " + client->nickname + " " + (*it)->getName() + " :You're not channel operator\n";
+						send(client->fd, str.data(), str.length(), 0);
+						break;
+					}
+					for (std::vector< ft::pair<std::string, int> >::iterator itt = (*it)->clients.begin() ; itt != (*it)->clients.end() ; ++itt)
+						if (itt->first == *ite)
+							toggle2 = 1;
+					if (toggle && toggle2)
+					{
+						toggle = 0;
 						for (std::vector< ft::pair<std::string, int> >::iterator itt = (*it)->clients.begin() ; itt != (*it)->clients.end() ; ++itt)
 							if (itt->first == *ite)
 							{
 								std::stringstream ss;
 								ss << ':' << itt->first << " PART " << *iter << '\n';
 								send(itt->second, ss.str().data(), ss.str().length(), 0);
-								std::string str = ":ircserv NOTICE * :*** Kicked of channel " + *iter + " ! Reason : " + comm + "\n";
+								std::string str = ":ircserv NOTICE * :*** Kicked of " + *iter + " ! Reason : " + comm + "\n";
 								send(itt->second, str.data(), str.length(), 0);
 								(*it)->clients.erase(itt);
+								toggle = 1;
 								break;
 							}
 						for (std::vector<std::string>::iterator itt = (*it)->operators.begin() ; itt != (*it)->operators.end() ; ++itt)
@@ -374,13 +384,8 @@ void Server::kick(std::vector<std::string>& cmd, Client* client, std::vector<Cli
 								if ((*i)->nickname == (*it)->clients.begin()->first)
 									(*i)->op.push_back((*it)->getName());
 						}
-						if ((*it)->clients.size())
+						if (toggle)
 							(*it)->send_userlist();
-					}
-					else
-					{
-						std::string str = ":ircserv 482 " + client->nickname + " " + (*it)->getName() + " :You're not channel operator\n";
-						send(client->fd, str.data(), str.length(), 0);
 					}
 				}
 }

@@ -173,7 +173,7 @@ void	Server::invite(std::vector<std::string>& cmd,std::vector<Client*>& clients,
 		if (!channels.empty())
 		{
 			for (std::vector<Channel *>::iterator it = channels.begin(); it != channels.end(); ++it)
-			{	
+			{
 				if (channels.at(i)->getName() == cmd[2])
 				{
 					chann_flag_manu += 1;
@@ -205,7 +205,7 @@ void	Server::invite(std::vector<std::string>& cmd,std::vector<Client*>& clients,
 						if (ite->first == cmd[1])
 						{
 							std::stringstream str;
-							str << ":ircserv 443 " << cmd[1] << ' ' << cmd[2] << " :is already on channel\n";
+							str << ":ircserv 443 " << cmd[2] << ' ' << cmd[1] << " :is already on channel\n";
 							send(client->fd, str.str().data(), str.str().length(), 0);
 							return ;
 						}
