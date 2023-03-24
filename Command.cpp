@@ -176,9 +176,13 @@ void Command::parse_join(void)
 	unsigned int count;
 	std::stringstream forgeron;
 	std::string tmp;
-	tmp = command[1];
-	if (tmp.empty())
+	if (command.size() < 2)
+	{
+		command.clear();
+		command.push_back("JOIN");
 		return;
+	}
+	tmp = command[1];
 	command.clear();
 	command.push_back("JOIN");
 	count = coma_count(tmp);
