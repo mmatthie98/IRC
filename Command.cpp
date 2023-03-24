@@ -89,14 +89,17 @@ std::vector<std::string> Command::get_next_command() {
 
 void	Command::upper_commands()
 {
-	for (std::vector<std::string>::iterator it = command.begin(); it != command.end(); ++it)
-	{
-		if (is_command((*it)))
-		{
-			for (unsigned int i = 0; i < (*it).size(); i++)
-				(*it).at(i) = std::toupper((*it).at(i));
-		}
-	}
+	// for (std::vector<std::string>::iterator it = command.begin(); it != command.end(); ++it)
+	// {
+	// 	if (is_command((*it)))
+	// 	{
+	// 		for (unsigned int i = 0; i < (*it).size(); i++)
+	// 			(*it).at(i) = std::toupper((*it).at(i));
+	// 	}
+	// }
+	for (unsigned int i = 0; i < (command[0]).size(); i++)
+		(command[0]).at(i) = std::toupper((command[0]).at(i));
+	
 }
 
 void	Command::parse_commands()
@@ -125,6 +128,8 @@ void	Command::parse_commands()
 		parse_mode();
 	if (command[0] == "KILL")
 		parse_kill();
+	if (command[0] == "QUIT")
+		parse_quit();
 }
 
 void Command::parse_kill(void)
@@ -145,14 +150,21 @@ void Command::parse_user(void)
 		regroup_last_args();
 }
 
-void Command::parse_user_wtf(void)
+void Command::parse_quit(void) 
 {
+	if (command.size() < 2)
+	{
+		command.clear();
+		command.push_back("QUIT");
+		command.push_back("Bye");
+		return ;
+	}
+	if (command.size() > 1 && command[1].at(0) == ':')
 		regroup_last_args();
 }
 
-void Command::parse_quit(void)
+void Command::parse_user_wtf(void)
 {
-	if (command.size() > 1 && command[1].at(0) == ':')
 		regroup_last_args();
 }
 
