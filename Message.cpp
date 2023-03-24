@@ -8,7 +8,7 @@ void Server::message(Client* client, fd_set& fdset, std::vector<Client*>& client
 	if (bytes_recv < 0)
 		return ;
 	else if (!bytes_recv)
-		quit(client, fdset, clients, channels);
+		quit(client, fdset, clients, channels, "Timeout");
 	else
 	{
 		//for (int i = 0 ; buffer[i] ; ++i)
@@ -21,7 +21,7 @@ void Server::message(Client* client, fd_set& fdset, std::vector<Client*>& client
 		if (cmd.empty())
 			return ;
 		if (cmd.front() == "QUIT")
-			return (quit(client, fdset, clients, channels));
+			return (quit(client, fdset, clients, channels, cmd.back()));
 		int ret = handle(cmd, clients, client);
 		if (ret <= 0 || ((cmd.front() == "PASS" || cmd.front() == "USER") && client->is_auth() == true))
 			return ;
@@ -53,7 +53,7 @@ void Server::message(Client* client, fd_set& fdset, std::vector<Client*>& client
 	}
 }
 
-void Server::quit(Client* client, fd_set& fdset, std::vector<Client*>& clients, std::vector<Channel*>& channels)
+void Server::quit(Client* client, fd_set& fdset, std::vector<Client*>& clients, std::vector<Channel*>& channels, std::string msg)
 {
 	close(client->fd);
 	FD_CLR(client->fd, &fdset);
@@ -81,7 +81,16 @@ void Server::quit(Client* client, fd_set& fdset, std::vector<Client*>& clients, 
 					(*i)->op.push_back((*it)->getName());
 		}
 		if (toggle)
+		{
+			std::stringstream s;
+			if (msg.front() == ':')
+				msg.erase(msg.begin());
+			s << ":" << client->nickname << " QUIT :" << msg << '\n';
+			for (std::vector<Client*>::iterator i = clients.begin() ; i != clients.end() ; ++i)
+				if ((*i)->nickname != client->nickname)
+					send((*i)->fd, s.str().data(), s.str().length(), 0);
 			(*it)->send_userlist();
+		}
 	}
 	for (std::vector<Client*>::iterator it = clients.begin() ; it != clients.end() ; ++it)
 		if (*it == client)
@@ -287,7 +296,7 @@ void Server::kill(std::vector<std::string>& cmd, Client* client, fd_set& fdset, 
 					std::stringstream ss;
 					ss << ':' << usr << " KILL :" << comm << '\n';
 					send((*itt)->fd, ss.str().data(), ss.str().length(), 0);
-					quit(*itt, fdset, clients, channels);
+					quit(*itt, fdset, clients, channels, comm);
 					break;
 				}
 			return ;
