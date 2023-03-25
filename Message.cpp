@@ -16,8 +16,8 @@ void Server::message(Client* client, fd_set& fdset, std::vector<Client*>& client
 		std::vector<std::string> cmd = check(buffer);
 		Command command(cmd, client, std::string(buffer));
 		cmd = command.return_vector();
-		for (std::vector<std::string>::iterator it = cmd.begin() ; it != cmd.end() ; ++it)
-			std::cout << "---" << *it << "---" << std::endl;
+		//for (std::vector<std::string>::iterator it = cmd.begin() ; it != cmd.end() ; ++it)
+		//	std::cout << "---" << *it << "---" << std::endl;
 		if (cmd.empty())
 			return ;
 		if (cmd.front() == "QUIT")
@@ -428,6 +428,9 @@ void Server::part(std::vector<std::string>& cmd, Client* client, std::vector<Cli
 			channel = cmd.back();
 			continue;
 		}
+		std::stringstream s;
+		s << ':' << client->nickname << " PART " << channel << " :Bye\n";
+		send(client->fd, s.str().data(), s.str().length(), 0);
 		for (std::vector<Channel*>::iterator it = channels.begin() ; it != channels.end() ; ++it)
 			if (channel == (*it)->getName())
 			{
@@ -457,7 +460,8 @@ void Server::part(std::vector<std::string>& cmd, Client* client, std::vector<Cli
 					std::stringstream s;
 					s << ':' << client->nickname << " PART " << channel << " :Bye\n";
 					for (std::vector<Client*>::iterator i = clients.begin() ; i != clients.end() ; ++i)
-						send((*i)->fd, s.str().data(), s.str().length(), 0);
+						if ((*i)->nickname != client->nickname)
+							send((*i)->fd, s.str().data(), s.str().length(), 0);
 					(*it)->send_userlist();
 				}
 			}
