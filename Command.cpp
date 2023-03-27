@@ -56,6 +56,8 @@ void	Command::regroup_last_args()
 			std::stringstream ss;
 			while (it != command.end())
 			{
+				if ((*it)[0] == ':')
+					(*it).erase(0, 1);
 				ss << (*it);
 				ss << ' ';
 				it++;
